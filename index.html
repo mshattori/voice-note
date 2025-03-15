@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Whisper Web</title>
+    <title>Voice Transcriber</title>
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.21.16/dist/css/uikit.min.css" />
+    <!-- UIkit JS -->
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.16/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.16/dist/js/uikit-icons.min.js"></script>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -18,16 +23,15 @@
         </div>
 
         <div id="main-area">
-            <h2>Whisper Web App</h2>
             <label for="language-select">Language:</label>
             <select id="language-select">
                 <option value="ja">Japanese</option>
                 <option value="en">English</option>
             </select><br><br>
-            <button id="record-button">Start Recording</button>
+            <button class="uk-button uk-button-primary" id="record-button">Start Recording</button>
             <div id="timer">00:00</div>
             <div id="transcription-result"></div>
-            <button id="copy-button" disabled>Copy</button>
+            <button class="uk-button uk-button-secondary" id="copy-button" disabled>Copy</button>
         </div>
     </div>
     <script src="index.js"></script>
