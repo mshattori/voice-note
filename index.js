@@ -1,0 +1,162 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const apiKeyConfig = document.getElementById('api-key-config');
+    const mainArea = document.getElementById('main-area');
+    const apiKeyInput = document.getElementById('api-key');
+    const baseUrlInput = document.getElementById('base-url');
+    const saveApiKeyButton = document.getElementById('save-api-key');
+
+     // Load API key and Base URL from local storage
+    let apiKey = localStorage.getItem('apiKey');
+    let baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
+
+     // If API key is not set, show API key configuration area
+    if (!apiKey) {
+        apiKeyConfig.style.display = 'block';
+        mainArea.style.display = 'none';
+    } else {
+        apiKeyConfig.style.display = 'none';
+        mainArea.style.display = 'block';
+    }
+
+     // When the "Save" button is clicked, save API key and Base URL to local storage
+    saveApiKeyButton.addEventListener('click', () => {
+        apiKey = apiKeyInput.value;
+        baseURL = baseUrlInput.value;
+        localStorage.setItem('apiKey', apiKey);
+        localStorage.setItem('baseURL', baseURL);
+        apiKeyConfig.style.display = 'none';
+        mainArea.style.display = 'block';
+    });
+
+    const recordButton = document.getElementById('record-button');
+    const timerDisplay = document.getElementById('timer');
+    const transcriptionResult = document.getElementById('transcription-result');
+    const copyButton = document.getElementById('copy-button');
+    const languageSelect = document.getElementById('language-select');
+
+    let isRecording = false;
+    let mediaRecorder;
+    let audioChunks = [];
+    let timerInterval;
+    let startTime;
+
+    recordButton.addEventListener('click', () => {
+        if (!isRecording) {
+            startRecording();
+        } else {
+            stopRecording();
+        }
+    });
+
+    function startRecording() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = handleDataAvailable;
+                mediaRecorder.onstop = handleStop;
+                mediaRecorder.start();
+
+                isRecording = true;
+                recordButton.textContent = '録音停止';
+                timerDisplay.textContent = '00:00';
+                startTimer();
+                audioChunks = []; // clear previous recording
+                transcriptionResult.textContent = ''; // clear previous transcription
+                copyButton.disabled = true; // disable copy button
+            })
+            .catch(error => {
+                console.error('Microphone access permission error:', error);
+                transcriptionResult.textContent = 'Microphone access has not been granted.';
+            });
+    }
+
+    function handleDataAvailable(event) {
+        if (event.data.size > 0) {
+            audioChunks.push(event.data);
+        }
+    }
+
+    function handleStop() {
+        isRecording = false;
+        recordButton.textContent = 'Start Recording';
+        stopTimer();
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        transcribeAudio(audioBlob);
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop()); // stop microphone access
+        }
+    }
+
+    function startTimer() {
+        startTime = Date.now();
+        timerInterval = setInterval(updateTimer, 1000); // update every second
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+    }
+
+    function updateTimer() {
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        const minutes = Math.floor(elapsedTime / 60);
+        const seconds = elapsedTime % 60;
+        const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        timerDisplay.textContent = formattedTime;
+
+        if (elapsedTime >= 600) { // 10 minutes limit
+            stopRecording();
+            transcriptionResult.textContent = 'Recording has automatically stopped because it exceeded 10 minutes.';
+        }
+    }
+
+    function transcribeAudio(audioBlob) {
+        transcriptionResult.textContent = 'Transcribing...'; // Loading display
+        const apiKey = localStorage.getItem('apiKey');
+        const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
+
+        if (!apiKey) {
+            transcriptionResult.textContent = 'API key is not set.';
+            apiKeyConfig.style.display = 'block'; // Show API key configuration area
+            mainArea.style.display = 'none'; // Hide main area
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', new File([audioBlob], "recording.webm", { type: 'audio/webm' }));
+        formData.append('model', 'whisper-1');
+        formData.append('language', languageSelect.value); // Specify language
+
+        fetch(`${baseURL}audio/transcriptions`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            transcriptionResult.textContent = data.text;
+            copyButton.disabled = false; // Enable copy button when transcription is successful
+        })
+        .catch(error => {
+            console.error('Transcription error:', error);
+            transcriptionResult.textContent = 'Transcription failed. Please check your API key, Base URL, and network connection.';
+        });
+    }
+
+    copyButton.addEventListener('click', () => {
+        const textToCopy = transcriptionResult.textContent;
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => {
+                alert('Text has been copied to the clipboard.'); // Notify successful clipboard copy
+            })
+            .catch(error => {
+                console.error('Clipboard copy error:', error);
+                alert('Failed to copy to clipboard.'); // Notify clipboard copy failure
+            });
+    });
+});

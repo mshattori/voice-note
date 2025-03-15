@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whisper Web</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div id="app">
+        <div id="api-key-config" style="display:none;">
+            <h2>API Key Settings</h2>
+            <label for="api-key">API Key:</label>
+            <input type="password" id="api-key" name="api-key"><br><br>
+            <label for="base-url">Base URL (optional):</label>
+            <input type="text" id="base-url" name="base-url" value="https://api.openai.com/v1/"><br><br>
+            <button id="save-api-key">Save</button>
+        </div>
+
+        <div id="main-area">
+            <h2>Whisper Web App</h2>
+            <label for="language-select">Language:</label>
+            <select id="language-select">
+                <option value="ja">Japanese</option>
+                <option value="en">English</option>
+            </select><br><br>
+            <button id="record-button">Start Recording</button>
+            <div id="timer">00:00</div>
+            <div id="transcription-result"></div>
+            <button id="copy-button" disabled>Copy</button>
+        </div>
+    </div>
+    <script src="index.js"></script>
+</body>
+</html>
