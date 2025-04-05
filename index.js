@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const textToCopy = transcriptionResult.textContent;
         navigator.clipboard.writeText(textToCopy)
             .then(() => {
-                alert('Text has been copied to the clipboard.'); // Notify successful clipboard copy
+                UIkit.notification('Text has been copied to the clipboard.', { status: 'success' }); // Notify successful clipboard copy using UIkit
             })
             .catch(error => {
                 console.error('Clipboard copy error:', error);
