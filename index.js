@@ -1,31 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const apiKeyConfig = document.getElementById('api-key-config');
     const mainArea = document.getElementById('main-area');
-    const apiKeyInput = document.getElementById('api-key');
-    const baseUrlInput = document.getElementById('base-url');
-    const saveApiKeyButton = document.getElementById('save-api-key');
+    const apiKeySettingMenuItem = document.querySelector('.uk-navbar-dropdown-nav a[href="#"]'); // "API Key Settings" menu item
 
-     // Load API key and Base URL from local storage
-    let apiKey = localStorage.getItem('apiKey');
-    let baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
+    // Function to open settings modal
+    const openSettingsModal = () => {
+        settingsModal.show();
+    };
 
-     // If API key is not set, show API key configuration area
-    if (!apiKey) {
-        apiKeyConfig.style.display = 'block';
-        mainArea.style.display = 'none';
-    } else {
-        apiKeyConfig.style.display = 'none';
-        mainArea.style.display = 'block';
-    }
+    // Create modal element
+    const settingsModal = UIkit.modal(
+        `<div id="settings-modal" uk-modal>
+            <div class="uk-modal-dialog">
+                <button class="uk-modal-close-default" type="button" uk-close></button>
+                <div class="uk-modal-header">
+                    <h2 class="uk-modal-title">API Key Settings</h2>
+                </div>
+                <div class="uk-modal-body">
+                    <iframe src="settings.html" width="100%" height="300px"></iframe>
+                </div>
+            </div>
+        </div>`
+    );
 
-     // When the "Save" button is clicked, save API key and Base URL to local storage
-    saveApiKeyButton.addEventListener('click', () => {
-        apiKey = apiKeyInput.value;
-        baseURL = baseUrlInput.value;
-        localStorage.setItem('apiKey', apiKey);
-        localStorage.setItem('baseURL', baseURL);
-        apiKeyConfig.style.display = 'none';
-        mainArea.style.display = 'block';
+    // Add event listener to "API Key Settings" menu item
+    apiKeySettingMenuItem.addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent default link behavior
+        openSettingsModal(); // Open settings modal
     });
 
     const recordButton = document.getElementById('record-button');
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaRecorder.start();
 
                 isRecording = true;
-                recordButton.textContent = '録音停止';
+                recordButton.textContent = 'Stop Recording';
                 timerDisplay.textContent = '00:00';
                 startTimer();
                 audioChunks = []; // clear previous recording

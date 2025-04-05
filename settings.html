@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.21.16/dist/css/uikit.min.css" />
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div id="api-key-config">
+        <h2>API Key Settings</h2>
+        <label for="api-key">API Key:</label>
+        <input type="password" id="api-key" name="api-key"><br><br>
+        <label for="base-url">Base URL (optional):</label>
+        <input type="text" id="base-url" name="base-url" value="https://api.openai.com/v1/"><br><br>
+        <button id="save-api-key">Save</button>
+    </div>
+    <!-- UIkit JS -->
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.16/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.16/dist/js/uikit-icons.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const apiKeyInput = document.getElementById('api-key');
+            const baseUrlInput = document.getElementById('base-url');
+            const saveApiKeyButton = document.getElementById('save-api-key');
+
+            // Load values from localStorage
+            apiKeyInput.value = localStorage.getItem('apiKey') || '';
+            baseUrlInput.value = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
+
+            // Save API key and base URL to localStorage
+            saveApiKeyButton.addEventListener('click', () => {
+                const apiKey = apiKeyInput.value;
+                const baseURL = baseUrlInput.value;
+                localStorage.setItem('apiKey', apiKey);
+                localStorage.setItem('baseURL', baseURL);
+                alert('Saved API Key and Base URL');
+            });
+        });
+    </script>
+</body>
+</html>
