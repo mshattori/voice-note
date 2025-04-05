@@ -117,9 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
 
         if (!apiKey) {
-            transcriptionResult.textContent = 'API key is not set.';
-            apiKeyConfig.style.display = 'block'; // Show API key configuration area
-            mainArea.style.display = 'none'; // Hide main area
+            UIkit.modal.alert('Please set your API key in the settings first.'); // Display error message using UIkit modal
             return;
         }
 
