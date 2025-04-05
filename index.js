@@ -135,14 +135,43 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            // Check if the response status is OK (200-299)
+            if (!response.ok) {
+                // If not OK, read the response body as text
+                return response.text().then(text => {
+                    // Try to parse the text as JSON to get a detailed error message from the API
+                    let detail = text;
+                    try {
+                        const errorJson = JSON.parse(text);
+                        if (errorJson.error && errorJson.error.message) {
+                            detail = errorJson.error.message;
+                        }
+                    } catch (e) {
+                        // Ignore JSON parse error, use the raw text
+                    }
+                    // Throw an error to be caught by the .catch block
+                    throw new Error(`API Error: ${response.status} ${response.statusText} - ${detail}`);
+                });
+            }
+            // If response is OK, parse it as JSON
+            return response.json();
+        })
         .then(data => {
-            transcriptionResult.textContent += (transcriptionResult.textContent ? '\n\n' : '') + data.text;
+            // Check if data and data.text exist
+            if (data && data.text) {
+                transcriptionResult.textContent += (transcriptionResult.textContent ? '\n\n' : '') + data.text;
+            } else {
+                console.warn('Transcription API returned success but no text:', data);
+                UIkit.modal.alert('Transcription failed: No text returned from API.'); // Display error message using UIkit modal
+            }
             copyButton.disabled = false; // Enable copy button when transcription is successful
         })
         .catch(error => {
-            console.error('Transcription error:', error);
-            transcriptionResult.textContent = 'Transcription failed. Please check your API key, Base URL, and network connection.';
+            console.error('Transcription fetch/processing error:', error); // Log error to console
+            // Display error message using UIkit modal
+            UIkit.modal.alert(`Transcription failed: ${error.message}`);
+            copyButton.disabled = true; // Disable copy button
         });
     }
 
