@@ -113,67 +113,82 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function transcribeAudio(audioBlob) {
-        const apiKey = localStorage.getItem('apiKey');
-        const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
+    const apiKey = localStorage.getItem('apiKey');
+    const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
 
-        if (!apiKey) {
-            transcriptionResult.textContent = 'API key is not set.';
-            apiKeyConfig.style.display = 'block'; // Show API key configuration area
-            mainArea.style.display = 'none'; // Hide main area
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', new File([audioBlob], "recording.webm", { type: 'audio/webm' }));
-        formData.append('model', 'gpt-4o-mini-transcribe');
-        formData.append('language', languageSelect.value); // Specify language
-
-        fetch(`${baseURL}audio/transcriptions`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-            },
-            body: formData
-        })
-        .then(response => {
-            // Check if the response status is OK (200-299)
-            if (!response.ok) {
-                // If not OK, read the response body as text
-                return response.text().then(text => {
-                    // Try to parse the text as JSON to get a detailed error message from the API
-                    let detail = text;
-                    try {
-                        const errorJson = JSON.parse(text);
-                        if (errorJson.error && errorJson.error.message) {
-                            detail = errorJson.error.message;
-                        }
-                    } catch (e) {
-                        // Ignore JSON parse error, use the raw text
-                    }
-                    // Throw an error to be caught by the .catch block
-                    throw new Error(`API Error: ${response.status} ${response.statusText} - ${detail}`);
-                });
-            }
-            // If response is OK, parse it as JSON
-            return response.json();
-        })
-        .then(data => {
-            // Check if data and data.text exist
-            if (data && data.text) {
-                transcriptionResult.textContent += (transcriptionResult.textContent ? '\n\n' : '') + data.text;
-            } else {
-                console.warn('Transcription API returned success but no text:', data);
-                UIkit.modal.alert('Transcription failed: No text returned from API.'); // Display error message using UIkit modal
-            }
-            copyButton.disabled = false; // Enable copy button when transcription is successful
-        })
-        .catch(error => {
-            console.error('Transcription fetch/processing error:', error); // Log error to console
-            // Display error message using UIkit modal
-            UIkit.modal.alert(`Transcription failed: ${error.message}`);
-            copyButton.disabled = true; // Disable copy button
-        });
+    if (!apiKey) {
+        transcriptionResult.textContent = 'API key is not set.';
+        apiKeyConfig.style.display = 'block'; // Show API key configuration area
+        mainArea.style.display = 'none'; // Hide main area
+        return;
     }
+
+    const formData = new FormData();
+    let selectedMimeType = 'audio/webm'; // Default MIME type
+    let fileName = 'recording.webm';
+
+    if (MediaRecorder.isTypeSupported('audio/webm')) {
+        selectedMimeType = 'audio/webm';
+        fileName = 'recording.webm';
+    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        selectedMimeType = 'audio/mp4';
+        fileName = 'recording.mp4';
+    } else {
+        UiKit.modal.alert('Unsupported audio format. Please use a supported browser.');
+        return;
+    }
+
+    const audioBlobWithType = new Blob(audioChunks, { type: selectedMimeType });
+    formData.append('file', new File([audioBlobWithType], fileName, { type: selectedMimeType }));
+    formData.append('model', 'gpt-4o-mini-transcribe');
+    formData.append('language', languageSelect.value); // Specify language
+
+    fetch(`${baseURL}audio/transcriptions`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+        },
+        body: formData
+    })
+    .then(response => {
+        // Check if the response status is OK (200-299)
+        if (!response.ok) {
+            // If not OK, read the response body as text
+            return response.text().then(text => {
+                // Try to parse the text as JSON to get a detailed error message from the API
+                let detail = text;
+                try {
+                    const errorJson = JSON.parse(text);
+                    if (errorJson.error && errorJson.error.message) {
+                        detail = errorJson.error.message;
+                    }
+                } catch (e) {
+                    // Ignore JSON parse error, use the raw text
+                }
+                // Throw an error to be caught by the .catch block
+                throw new Error(`API Error: ${response.status} ${response.statusText} - ${detail}`);
+            });
+        }
+        // If response is OK, parse it as JSON
+        return response.json();
+    })
+    .then(data => {
+        // Check if data and data.text exist
+        if (data && data.text) {
+            transcriptionResult.textContent += (transcriptionResult.textContent ? '\n\n' : '') + data.text;
+        } else {
+            console.warn('Transcription API returned success but no text:', data);
+            UIkit.modal.alert('Transcription failed: No text returned from API.'); // Display error message using UIkit modal
+        }
+        copyButton.disabled = false; // Enable copy button when transcription is successful
+    })
+    .catch(error => {
+        console.error('Transcription fetch/processing error:', error); // Log error to console
+        // Display error message using UIkit modal
+        UIkit.modal.alert(`Transcription failed: ${error.message}`);
+        copyButton.disabled = true; // Disable copy button
+    });
+}
 
     copyButton.addEventListener('click', () => {
         const textToCopy = transcriptionResult.textContent;
