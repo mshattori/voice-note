@@ -113,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function transcribeAudio(audioBlob) {
-                transcriptionResult.textContent += (transcriptionResult.textContent ? '\n\n' : '') + 'Transcribing...'; // Loading display
         const apiKey = localStorage.getItem('apiKey');
         const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
 
