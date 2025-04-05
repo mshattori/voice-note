@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const formData = new FormData();
         formData.append('file', new File([audioBlob], "recording.webm", { type: 'audio/webm' }));
-        formData.append('model', 'whisper-1');
+        formData.append('model', 'gpt-4o-mini-transcribe');
         formData.append('language', languageSelect.value); // Specify language
 
         fetch(`${baseURL}audio/transcriptions`, {
