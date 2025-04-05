@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 timerDisplay.textContent = '00:00';
                 startTimer();
                 audioChunks = []; // clear previous recording
-                transcriptionResult.textContent = ''; // clear previous transcription
                 copyButton.disabled = true; // disable copy button
             })
             .catch(error => {
@@ -114,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function transcribeAudio(audioBlob) {
-        transcriptionResult.textContent = 'Transcribing...'; // Loading display
+                transcriptionResult.textContent += (transcriptionResult.textContent ? '\n\n' : '') + 'Transcribing...'; // Loading display
         const apiKey = localStorage.getItem('apiKey');
         const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
 
@@ -139,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(response => response.json())
         .then(data => {
-            transcriptionResult.textContent = data.text;
+            transcriptionResult.textContent += (transcriptionResult.textContent ? '\n\n' : '') + data.text;
             copyButton.disabled = false; // Enable copy button when transcription is successful
         })
         .catch(error => {
