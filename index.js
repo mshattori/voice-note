@@ -201,4 +201,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Failed to copy to clipboard.'); // Notify clipboard copy failure
             });
     });
+
+    const clearButton = document.getElementById('clear-button');
+    clearButton.addEventListener('click', () => {
+        transcriptionResult.textContent = ''; // Clear transcription text
+    });
 });
