@@ -10,11 +10,15 @@
 </head>
 <body>
     <div id="api-key-config">
-        <h2>API Key Settings</h2>
         <label for="api-key">API Key:</label>
         <input type="password" id="api-key" name="api-key"><br><br>
         <label for="base-url">Base URL (optional):</label>
         <input type="text" id="base-url" name="base-url" value="https://api.openai.com/v1/"><br><br>
+        <label for="model-select">Transcription Model:</label>
+        <select id="model-select" name="model-select">
+            <option value="gpt-4o-mini-transcribe">gpt-4o-mini-transcribe</option>
+            <option value="whisper-1">whisper-1</option>
+        </select><br><br>
         <button id="save-api-key">Save</button>
     </div>
     <!-- UIkit JS -->
@@ -24,19 +28,23 @@
         document.addEventListener('DOMContentLoaded', () => {
             const apiKeyInput = document.getElementById('api-key');
             const baseUrlInput = document.getElementById('base-url');
+            const modelSelect = document.getElementById('model-select');
             const saveApiKeyButton = document.getElementById('save-api-key');
 
             // Load values from localStorage
             apiKeyInput.value = localStorage.getItem('apiKey') || '';
             baseUrlInput.value = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
+            modelSelect.value = localStorage.getItem('model-select') || 'gpt-4o-mini-transcribe'; // Default model
 
-            // Save API key and base URL to localStorage
+            // Save API key, base URL, and selected model to localStorage
             saveApiKeyButton.addEventListener('click', () => {
                 const apiKey = apiKeyInput.value;
                 const baseURL = baseUrlInput.value;
+                const selectedModel = modelSelect.value;
                 localStorage.setItem('apiKey', apiKey);
                 localStorage.setItem('baseURL', baseURL);
-                alert('Saved API Key and Base URL');
+                localStorage.setItem('model-select', selectedModel);
+                alert('Saved API Key, Base URL and Model');
             });
         });
     </script>

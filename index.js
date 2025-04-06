@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="uk-modal-dialog">
                 <button class="uk-modal-close-default" type="button" uk-close></button>
                 <div class="uk-modal-header">
-                    <h2 class="uk-modal-title">API Key Settings</h2>
+                    <h2 class="uk-modal-title">OpenAI API Settings</h2>
                 </div>
                 <div class="uk-modal-body">
                     <iframe src="settings.html" width="100%" height="300px"></iframe>
@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function transcribeAudio(audioBlob) {
         const apiKey = localStorage.getItem('apiKey');
         const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
+        const model = localStorage.getItem('model-select') || 'gpt-4o-mini-transcribe';
 
         if (!apiKey) {
             UIkit.modal.alert('Please set your API key in the settings first.'); // Display error message using UIkit modal
@@ -138,8 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const audioBlobWithType = new Blob(audioChunks, { type: selectedMimeType });
         formData.append('file', new File([audioBlobWithType], fileName, { type: selectedMimeType }));
-        formData.append('model', 'gpt-4o-mini-transcribe');
-        formData.append('language', languageSelect.value); // Specify language
+        formData.append('model', model);
+        formData.append('language', languageSelect.value);
 
         fetch(`${baseURL}audio/transcriptions`, {
             method: 'POST',
