@@ -6,6 +6,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const openSettingsModal = () => {
         settingsModal.show();
     };
+    
+    const saveTranscriptionToLocalStorage = () => {
+        const transcriptionText = document.getElementById('transcription-result').textContent;
+        localStorage.setItem('voice-note-transcription', transcriptionText);
+    };
+    
+    const restoreTranscriptionFromLocalStorage = () => {
+        const savedText = localStorage.getItem('voice-note-transcription');
+        if (savedText) {
+            document.getElementById('transcription-result').textContent = savedText;
+        }
+    };
+    
+    restoreTranscriptionFromLocalStorage();
+    
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            saveTranscriptionToLocalStorage();
+        }
+    });
+    
+    window.addEventListener('pagehide', saveTranscriptionToLocalStorage);
+    window.addEventListener('beforeunload', saveTranscriptionToLocalStorage);
 
     // Create modal element
     const settingsModal = UIkit.modal(
@@ -215,5 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearButton = document.getElementById('clear-button');
     clearButton.addEventListener('click', () => {
         transcriptionResult.textContent = ''; // Clear transcription text
+        localStorage.removeItem('voice-note-transcription'); // Also clear from localStorage
     });
 });
