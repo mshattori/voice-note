@@ -28,6 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
         openSettingsModal(); // Open settings modal
     });
 
+    const START_RECORDING_LABEL = 'Start Recording';
+    const STOP_RECORDING_LABEL = 'Stop Recording';
+    const TRANSCRIBING_LABEL = 'Transcribing...';
+
     const recordButton = document.getElementById('record-button');
     const timerDisplay = document.getElementById('timer');
     const transcriptionResult = document.getElementById('transcription-result');
@@ -57,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaRecorder.start();
 
                 isRecording = true;
-                recordButton.textContent = 'Stop Recording';
+                recordButton.textContent = STOP_RECORDING_LABEL;
                 timerDisplay.textContent = '00:00';
                 startTimer();
                 audioChunks = []; // clear previous recording
@@ -77,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleStop() {
         isRecording = false;
-        recordButton.textContent = 'Start Recording';
+        recordButton.textContent = START_RECORDING_LABEL;
         stopTimer();
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
         transcribeAudio(audioBlob);
@@ -113,6 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function transcribeAudio(audioBlob) {
+        recordButton.disabled = true;
+        recordButton.textContent = TRANSCRIBING_LABEL;
+
         const apiKey = localStorage.getItem('apiKey');
         const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
         const model = localStorage.getItem('model-select') || 'gpt-4o-mini-transcribe';
@@ -179,12 +186,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.warn('Transcription API returned success but no text:', data);
                 UIkit.modal.alert('Transcription failed: No text returned from API.'); // Display error message using UIkit modal
             }
+            recordButton.disabled = false;
+            recordButton.textContent = START_RECORDING_LABEL;
             copyButton.disabled = false; // Enable copy button when transcription is successful
         })
         .catch(error => {
             console.error('Transcription fetch/processing error:', error); // Log error to console
             // Display error message using UIkit modal
             UIkit.modal.alert(`Transcription failed: ${error.message}`);
+            recordButton.disabled = false;
+            recordButton.textContent = START_RECORDING_LABEL;
             copyButton.disabled = true; // Disable copy button
         });
     }
