@@ -21,6 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     restoreTranscriptionFromLocalStorage();
     
+    const checkAndEnableRefineButton = () => {
+        if (document.getElementById('refine-button') && document.getElementById('transcription-result')) {
+            const text = document.getElementById('transcription-result').textContent;
+            document.getElementById('refine-button').disabled = !text;
+        }
+    };
+    
+    setTimeout(checkAndEnableRefineButton, 100);
+    
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {
             saveTranscriptionToLocalStorage();
@@ -29,6 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     window.addEventListener('pagehide', saveTranscriptionToLocalStorage);
     window.addEventListener('beforeunload', saveTranscriptionToLocalStorage);
+
+    let prompts = null;
+    fetch('prompts.json')
+        .then(response => response.json())
+        .then(data => {
+            prompts = data;
+        })
+        .catch(error => console.error('Error loading prompts:', error));
 
     // Create modal element
     const settingsModal = UIkit.modal(
@@ -54,11 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const START_RECORDING_LABEL = 'Start Recording';
     const STOP_RECORDING_LABEL = 'Stop Recording';
     const TRANSCRIBING_LABEL = 'Transcribing...';
+    const REFINING_LABEL = 'Refining...';
 
     const recordButton = document.getElementById('record-button');
     const timerDisplay = document.getElementById('timer');
     const transcriptionResult = document.getElementById('transcription-result');
     const copyButton = document.getElementById('copy-button');
+    const refineButton = document.getElementById('refine-button');
     const languageSelect = document.getElementById('language-select');
 
     let isRecording = false;
@@ -212,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             recordButton.disabled = false;
             recordButton.textContent = START_RECORDING_LABEL;
             copyButton.disabled = false; // Enable copy button when transcription is successful
+            refineButton.disabled = false; // Enable refine button when transcription is successful
         })
         .catch(error => {
             console.error('Transcription fetch/processing error:', error); // Log error to console
@@ -234,10 +254,103 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Failed to copy to clipboard.'); // Notify clipboard copy failure
             });
     });
+    
+    function refineTranscription() {
+        const transcriptionText = transcriptionResult.textContent;
+        if (!transcriptionText) {
+            UIkit.notification('No text to refine.', { status: 'warning' });
+            return;
+        }
+
+        refineButton.disabled = true;
+        refineButton.textContent = REFINING_LABEL;
+        
+        const apiKey = localStorage.getItem('apiKey');
+        const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
+        const modelName = "gpt-4o-2024-08-06"; // 指定のモデルを使用
+        
+        if (!apiKey) {
+            UIkit.modal.alert('Please set your API key in the settings first.');
+            refineButton.disabled = false;
+            refineButton.textContent = 'Refine';
+            return;
+        }
+        
+        if (!prompts) {
+            UIkit.modal.alert('Unable to load prompts. Please refresh the page and try again.');
+            refineButton.disabled = false;
+            refineButton.textContent = 'Refine';
+            return;
+        }
+        
+        const language = languageSelect.value === 'ja' ? 'Japanese' : 'English';
+        const promptTemplate = prompts.default[language].prompt;
+        const promptContent = promptTemplate.replace('{input_text}', transcriptionText);
+        
+        fetch(`${baseURL}chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+                model: modelName,
+                messages: [{ role: "user", content: promptContent }],
+                response_format: {
+                    type: "json_schema",
+                    schema: {
+                        type: "object",
+                        properties: {
+                            refined_text: { type: "string" }
+                        },
+                        required: ["refined_text"],
+                        additionalProperties: false
+                    }
+                }
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    let detail = text;
+                    try {
+                        const errorJson = JSON.parse(text);
+                        if (errorJson.error && errorJson.error.message) {
+                            detail = errorJson.error.message;
+                        }
+                    } catch (e) {
+                        // Ignore JSON parse error, use the raw text
+                    }
+                    throw new Error(`API Error: ${response.status} ${response.statusText} - ${detail}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            try {
+                const responseContent = JSON.parse(data.choices[0].message.content);
+                transcriptionResult.textContent = responseContent.refined_text;
+                UIkit.notification('Text has been refined.', { status: 'success' });
+            } catch (error) {
+                console.error('Error parsing API response:', error);
+                UIkit.modal.alert('Failed to parse the refined text.');
+            }
+            refineButton.disabled = false;
+            refineButton.textContent = 'Refine';
+        })
+        .catch(error => {
+            console.error('Refinement fetch/processing error:', error);
+            UIkit.modal.alert(`Refinement failed: ${error.message}`);
+            refineButton.disabled = false;
+            refineButton.textContent = 'Refine';
+        });
+    }
 
     const clearButton = document.getElementById('clear-button');
     clearButton.addEventListener('click', () => {
         transcriptionResult.textContent = ''; // Clear transcription text
         localStorage.removeItem('voice-note-transcription'); // Also clear from localStorage
     });
+    
+    refineButton.addEventListener('click', refineTranscription);
 });
