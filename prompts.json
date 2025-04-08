@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "default": {
+    "Japanese": {
+      "prompt": "以下のトランスクリプトは、会話中の言い間違え、重複表現、迷走した表現など、口語特有の不整合が含まれています。これらの問題を修正し、文法や表現を整えて、明確かつ読みやすい文章に書き直してください。日本語で一般的にカタカナで使われない用語や固有名詞はアルファベットでASCIIに置き換えてください。\n\n入力テキスト:\n{input_text}"
+    },
+    "English": {
+      "prompt": "The following transcript contains spoken language errors, repeated phrases, and disorganized expressions typical in impromptu speech. Please correct these issues by refining the grammar, eliminating redundancies, and restructuring the text into a clear and coherent format. \n\nInput text:\n{input_text}"
+    }
+  }
+}
