@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const checkAndEnableRefineButton = () => {
         if (document.getElementById('refine-button') && document.getElementById('transcription-result')) {
-            const text = document.getElementById('transcription-result').textContent;
+            const text = document.getElementById('transcription-result').textContent.trim();
             document.getElementById('refine-button').disabled = !text;
         }
     };
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const apiKey = localStorage.getItem('apiKey');
         const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
-        const modelName = "gpt-4o-2024-08-06"; // 指定のモデルを使用
+        const modelName = "gpt-4o-mini"; // Use the specified model
         
         if (!apiKey) {
             UIkit.modal.alert('Please set your API key in the settings first.');
