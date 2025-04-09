@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const promptTemplate = prompts.default[language].prompt;
         const promptContent = promptTemplate.replace('{input_text}', transcriptionText);
         
-        fetch(`${baseURL}responses`, {
+        fetch(`${baseURL}chat/completions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -295,11 +295,12 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({
                 model: modelName,
-                input: [{ role: "user", content: promptContent }],
-                text: {
-                    format: {
-                        type: "json_schema",
+                messages: [{ role: "user", content: promptContent }],
+                response_format: {
+                    type: "json_schema",
+                    json_schema: {
                         name: "refined_transcription",
+                        strict: true,
                         schema: {
                             type: "object",
                             properties: {
@@ -307,8 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             },
                             required: ["refined_text"],
                             additionalProperties: false
-                        },
-                        strict: true
+                        }
                     }
                 }
             })
@@ -332,9 +332,12 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(data => {
             try {
-                const responseContent = JSON.parse(data.output[0].content[0].text);
+                const responseContent = JSON.parse(data.choices[0].message.content);
+                if (!responseContent || !responseContent.refined_text) {
+                    throw new Error('Invalid response format from API.');
+                }
                 transcriptionResult.textContent = responseContent.refined_text;
-                UIkit.notification('Text has been refined.', { status: 'success' });
+                // UIkit.notification('Text has been refined.', { status: 'success' });
             } catch (error) {
                 console.error('Error parsing API response:', error);
                 UIkit.modal.alert('Failed to parse the refined text.');
