@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const promptTemplate = prompts.default[language].prompt;
         const promptContent = promptTemplate.replace('{input_text}', transcriptionText);
         
-        fetch(`${baseURL}chat/completions`, {
+        fetch(`${baseURL}responses`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -295,16 +295,20 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({
                 model: modelName,
-                messages: [{ role: "user", content: promptContent }],
-                response_format: {
-                    type: "json_schema",
-                    schema: {
-                        type: "object",
-                        properties: {
-                            refined_text: { type: "string" }
+                input: [{ role: "user", content: promptContent }],
+                text: {
+                    format: {
+                        type: "json_schema",
+                        name: "refined_transcription",
+                        schema: {
+                            type: "object",
+                            properties: {
+                                refined_text: { type: "string" }
+                            },
+                            required: ["refined_text"],
+                            additionalProperties: false
                         },
-                        required: ["refined_text"],
-                        additionalProperties: false
+                        strict: true
                     }
                 }
             })
@@ -328,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(data => {
             try {
-                const responseContent = JSON.parse(data.choices[0].message.content);
+                const responseContent = JSON.parse(data.output[0].content[0].text);
                 transcriptionResult.textContent = responseContent.refined_text;
                 UIkit.notification('Text has been refined.', { status: 'success' });
             } catch (error) {
