@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const mainArea = document.getElementById('main-area');
     const apiKeySettingMenuItem = document.querySelector('.uk-navbar-dropdown-nav a[href="#"]'); // "API Key Settings" menu item
 
     // Function to open settings modal
@@ -21,14 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     restoreTranscriptionFromLocalStorage();
     
-    const checkAndEnableRefineButton = () => {
-        if (document.getElementById('refine-button') && document.getElementById('transcription-result')) {
+    const checkAndShowRefineIcon = () => {
+        if (document.getElementById('refine-icon') && document.getElementById('transcription-result')) {
             const text = document.getElementById('transcription-result').textContent.trim();
-            document.getElementById('refine-button').disabled = !text;
+            document.getElementById('refine-icon').hidden = !text;
         }
     };
     
-    setTimeout(checkAndEnableRefineButton, 100);
+    setTimeout(checkAndShowRefineIcon, 100);
     
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {
@@ -71,13 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const START_RECORDING_LABEL = 'Start Recording';
     const STOP_RECORDING_LABEL = 'Stop Recording';
     const TRANSCRIBING_LABEL = 'Transcribing...';
-    const REFINING_LABEL = 'Refining...';
 
     const recordButton = document.getElementById('record-button');
     const timerDisplay = document.getElementById('timer');
     const transcriptionResult = document.getElementById('transcription-result');
     const copyButton = document.getElementById('copy-button');
-    const refineButton = document.getElementById('refine-button');
+    const refineIcon = document.getElementById('refine-icon');
     const languageSelect = document.getElementById('language-select');
 
     let isRecording = false;
@@ -231,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
             recordButton.disabled = false;
             recordButton.textContent = START_RECORDING_LABEL;
             copyButton.disabled = false; // Enable copy button when transcription is successful
-            refineButton.disabled = false; // Enable refine button when transcription is successful
+            refineIcon.hidden = false; // Show refine icon when transcription is successful
         })
         .catch(error => {
             console.error('Transcription fetch/processing error:', error); // Log error to console
@@ -262,8 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        refineButton.disabled = true;
-        refineButton.textContent = REFINING_LABEL;
+        refineIcon.hidden = true; // Hide refine icon during refinement
         
         const apiKey = localStorage.getItem('apiKey');
         const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
@@ -271,15 +268,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!apiKey) {
             UIkit.modal.alert('Please set your API key in the settings first.');
-            refineButton.disabled = false;
-            refineButton.textContent = 'Refine';
+            refineIcon.hidden = false; // Show refine icon after refinement
             return;
         }
         
         if (!prompts) {
             UIkit.modal.alert('Unable to load prompts. Please refresh the page and try again.');
-            refineButton.disabled = false;
-            refineButton.textContent = 'Refine';
+            refineIcon.hidden = false; // Show refine icon after refinement
             return;
         }
         
@@ -342,14 +337,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error parsing API response:', error);
                 UIkit.modal.alert('Failed to parse the refined text.');
             }
-            refineButton.disabled = false;
-            refineButton.textContent = 'Refine';
+            refineIcon.hidden = false; // Show refine icon after refinement
         })
         .catch(error => {
             console.error('Refinement fetch/processing error:', error);
             UIkit.modal.alert(`Refinement failed: ${error.message}`);
-            refineButton.disabled = false;
-            refineButton.textContent = 'Refine';
+            refineIcon.hidden = false; // Show refine icon after refinement error
         });
     }
 
@@ -359,5 +352,5 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('voice-note-transcription'); // Also clear from localStorage
     });
     
-    refineButton.addEventListener('click', refineTranscription);
+    refineIcon.addEventListener('click', refineTranscription);
 });

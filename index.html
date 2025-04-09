@@ -45,9 +45,14 @@
             </select><br><br>
             <button class="uk-button uk-button-primary" id="record-button">Start Recording</button>
             <div id="timer">00:00</div>
-            <textarea id="transcription-result" class="uk-textarea" contenteditable="true"></textarea>
+            <div class="textarea-wrapper">
+            <div class="textarea-wrapper">
+                <textarea id="transcription-result" class="uk-textarea" contenteditable="true"></textarea>
+                <div class="icon-area">
+                    <span id="refine-icon" uk-icon="icon: refresh" uk-tooltip="Refine"></span>
+                </div>
+            </div>
             <button class="uk-button uk-button-secondary" id="copy-button" disabled>Copy</button>
-            <button class="uk-button uk-button-primary" id="refine-button" disabled>Refine</button>
             <button class="uk-button uk-button-default" id="clear-button">Clear</button>
         </div>
     </div>
