@@ -49,7 +49,9 @@
             <div class="textarea-wrapper">
                 <textarea id="transcription-result" class="uk-textarea" contenteditable="true"></textarea>
                 <div class="icon-area">
-                    <span id="refine-icon" uk-icon="icon: refresh" uk-tooltip="Refine"></span>
+                    <span id="refine-icon" uk-icon="icon: refresh" uk-tooltip="Refine by AI"></span>
+                    <!-- Spinner (hidden by default) -->
+                    <div id="refine-spinner" uk-spinner="ratio: 0.8" hidden></div>
                 </div>
             </div>
             <button class="uk-button uk-button-secondary" id="copy-button" disabled>Copy</button>

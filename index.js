@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const transcriptionResult = document.getElementById('transcription-result');
     const copyButton = document.getElementById('copy-button');
     const refineIcon = document.getElementById('refine-icon');
+    const refineSpinner = document.getElementById('refine-spinner');
     const languageSelect = document.getElementById('language-select');
 
     let isRecording = false;
@@ -260,7 +261,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        refineIcon.hidden = true; // Hide refine icon during refinement
+        // Hide refine icon and show spinner during refinement
+        refineIcon.hidden = true;
+        refineSpinner.hidden = false;
         
         const apiKey = localStorage.getItem('apiKey');
         const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
@@ -268,13 +271,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!apiKey) {
             UIkit.modal.alert('Please set your API key in the settings first.');
-            refineIcon.hidden = false; // Show refine icon after refinement
+            // Hide spinner and show refine icon
+            refineSpinner.hidden = true;
+            refineIcon.hidden = false;
             return;
         }
         
         if (!prompts) {
             UIkit.modal.alert('Unable to load prompts. Please refresh the page and try again.');
-            refineIcon.hidden = false; // Show refine icon after refinement
+            // Hide spinner and show refine icon
+            refineSpinner.hidden = true;
+            refineIcon.hidden = false;
             return;
         }
         
@@ -337,12 +344,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error parsing API response:', error);
                 UIkit.modal.alert('Failed to parse the refined text.');
             }
-            refineIcon.hidden = false; // Show refine icon after refinement
+            // Hide spinner and show refine icon after refinement
+            refineSpinner.hidden = true;
+            refineIcon.hidden = false;
         })
         .catch(error => {
             console.error('Refinement fetch/processing error:', error);
             UIkit.modal.alert(`Refinement failed: ${error.message}`);
-            refineIcon.hidden = false; // Show refine icon after refinement error
+            // Hide spinner and show refine icon after refinement error
+            refineSpinner.hidden = true;
+            refineIcon.hidden = false;
         });
     }
 
