@@ -1,17 +1,21 @@
 import { initNotesModule } from './notes.js';
+import { initAwsS3SyncModule } from './aws-sync.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const START_RECORDING_LABEL = 'Start Recording';
     const STOP_RECORDING_LABEL = 'Stop Recording';
     const TRANSCRIBING_LABEL = 'Transcribing...';
 
-    const apiKeySettingMenuItem = document.querySelector('.uk-navbar-dropdown-nav a[href="#"]'); // "API Key Settings" menu item
+    const apiKeySettingMenuItem = document.querySelector('.uk-navbar-dropdown-nav a[id="openai-settings-link"]'); // "OpenAI API Settings" menu item
+    const awsS3SettingMenuItem = document.querySelector('.uk-navbar-dropdown-nav a[id="aws-s3-settings-link"]'); // "AWS S3 Settings" menu item
     const recordButton = document.getElementById('record-button');
     const timerDisplay = document.getElementById('timer');
     const transcriptionResult = document.getElementById('transcription-result');
     const copyButton = document.getElementById('copy-button');
     const refineIcon = document.getElementById('refine-icon');
     const refineSpinner = document.getElementById('refine-spinner');
+    const syncIcon = document.getElementById('sync-icon');
+    const syncSpinner = document.getElementById('sync-spinner');
     const languageSelect = document.getElementById('language-select');
 
     let isRecording = false;
@@ -66,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => console.error('Error loading prompts:', error));
 
-    // Create modal element
+    // Create OpenAI settings modal element
     const settingsModal = UIkit.modal(
         `<div id="settings-modal" uk-modal>
             <div class="uk-modal-dialog">
@@ -80,11 +84,32 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         </div>`
     );
+    
+    // Create AWS S3 settings modal element
+    const awsSettingsModal = UIkit.modal(
+        `<div id="aws-settings-modal" uk-modal>
+            <div class="uk-modal-dialog">
+                <button class="uk-modal-close-default" type="button" uk-close></button>
+                <div class="uk-modal-header">
+                    <h2 class="uk-modal-title">AWS S3 Settings</h2>
+                </div>
+                <div class="uk-modal-body">
+                    <iframe src="aws-settings.html" width="100%" height="350px"></iframe>
+                </div>
+            </div>
+        </div>`
+    );
 
-    // Add event listener to "API Key Settings" menu item
+    // Add event listener to "OpenAI API Settings" menu item
     apiKeySettingMenuItem.addEventListener('click', (e) => {
         e.preventDefault(); // Prevent default link behavior
         openSettingsModal(); // Open settings modal
+    });
+    
+    // Add event listener to "AWS S3 Settings" menu item
+    awsS3SettingMenuItem.addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent default link behavior
+        awsSettingsModal.show(); // Open AWS settings modal
     });
 
     // Resizing of transcription result area
@@ -381,4 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize the notes module
     initNotesModule();
+    
+    // Initialize the AWS S3 sync module
+    initAwsS3SyncModule();
 });

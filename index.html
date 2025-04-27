@@ -26,7 +26,8 @@
                             <a href="#">Settings</a>
                             <div class="uk-navbar-dropdown">
                                 <ul class="uk-nav uk-navbar-dropdown-nav">
-                                    <li><a href="#">OpenAI API Settings</a></li>
+                                    <li><a href="#" id="openai-settings-link">OpenAI API Settings</a></li>
+                                    <li><a href="#" id="aws-s3-settings-link">AWS S3 Settings</a></li>
                                 </ul>
                             </div>
                         </li>
@@ -63,6 +64,8 @@
                             <span id="refine-icon" uk-icon="icon: refresh" uk-tooltip="Refine by AI"></span>
                             <!-- Spinner (hidden by default) -->
                             <div id="refine-spinner" uk-spinner="ratio: 0.8" hidden></div>
+                            <span id="sync-icon" uk-icon="icon: cloud-upload" uk-tooltip="Sync with S3"></span>
+                            <div id="sync-spinner" uk-spinner="ratio: 0.8" hidden></div>
                             <span id="save-icon" uk-icon="icon: folder" uk-tooltip="Save"></span>
                         </div>
                     </div>
@@ -115,6 +118,8 @@
             </form>
         </div>
     </div>
+    <!-- AWS SDK -->
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1066.0.min.js"></script>
     <script src="index.js" type="module"></script>
 </body>
 </html>
