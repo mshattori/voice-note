@@ -1,5 +1,13 @@
 /* CSS styles for Whisper Web App */
 
+html {
+    box-sizing: border-box;
+    background-color: #f0f0f0;
+}
+*, *::before, *::after {
+    box-sizing: inherit;
+}
+
 body {
     font-family: sans-serif;
     min-height: 100vh;
@@ -10,6 +18,7 @@ body {
 
 #app {
     background-color: #fff;
+    margin: 20px auto 0;
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
