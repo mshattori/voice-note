@@ -7,14 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const saveTranscriptionToLocalStorage = () => {
-        const transcriptionText = document.getElementById('transcription-result').textContent;
+        const transcriptionText = document.getElementById('transcription-result').value;
         localStorage.setItem('voice-note-transcription', transcriptionText);
     };
     
     const restoreTranscriptionFromLocalStorage = () => {
         const savedText = localStorage.getItem('voice-note-transcription');
         if (savedText) {
-            document.getElementById('transcription-result').textContent = savedText;
+            document.getElementById('transcription-result').value = savedText;
         }
     };
     
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const checkAndShowRefineIcon = () => {
         if (document.getElementById('refine-icon') && document.getElementById('transcription-result')) {
-            const text = document.getElementById('transcription-result').textContent.trim();
+            const text = document.getElementById('transcription-result').value.trim();
             document.getElementById('refine-icon').hidden = !text;
         }
     };
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => {
                 console.error('Microphone access permission error:', error);
-                transcriptionResult.textContent = 'Microphone access has not been granted.';
+                transcriptionResult.value = 'Microphone access has not been granted.';
             });
     }
 
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (elapsedTime >= 600) { // 10 minutes limit
             stopRecording();
-            transcriptionResult.textContent = 'Recording has automatically stopped because it exceeded 10 minutes.';
+            transcriptionResult.value = 'Recording has automatically stopped because it exceeded 10 minutes.';
         }
     }
 
@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             // Check if data and data.text exist
             if (data && data.text) {
-                transcriptionResult.textContent += (transcriptionResult.textContent ? '\n\n' : '') + data.text;
+                transcriptionResult.value += (transcriptionResult.value ? '\n\n' : '') + data.text;
                 autoResize.call(transcriptionResult)
             } else {
                 console.warn('Transcription API returned success but no text:', data);
@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     copyButton.addEventListener('click', () => {
-        const textToCopy = transcriptionResult.textContent;
+        const textToCopy = transcriptionResult.value;
         navigator.clipboard.writeText(textToCopy)
             .then(() => {
                 UIkit.notification('Text has been copied to the clipboard.', { status: 'success' }); // Notify successful clipboard copy using UIkit
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     function refineTranscription() {
-        const transcriptionText = transcriptionResult.textContent;
+        const transcriptionText = transcriptionResult.value;
         if (!transcriptionText) {
             UIkit.notification('No text to refine.', { status: 'warning' });
             return;
@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!responseContent || !responseContent.refined_text) {
                     throw new Error('Invalid response format from API.');
                 }
-                transcriptionResult.textContent = responseContent.refined_text;
+                transcriptionResult.value = responseContent.refined_text;
                 autoResize.call(transcriptionResult)
                 // UIkit.notification('Text has been refined.', { status: 'success' });
             } catch (error) {
@@ -370,8 +370,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const clearButton = document.getElementById('clear-button');
     clearButton.addEventListener('click', () => {
-        transcriptionResult.textContent = ''; // Clear transcription text
+        transcriptionResult.value = ''; // Clear transcription text
         localStorage.removeItem('voice-note-transcription'); // Also clear from localStorage
+        autoResize.call(transcriptionResult); // Adjust height after clearing
     });
     
     refineIcon.addEventListener('click', refineTranscription);
