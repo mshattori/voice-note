@@ -1,5 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const START_RECORDING_LABEL = 'Start Recording';
+    const STOP_RECORDING_LABEL = 'Stop Recording';
+    const TRANSCRIBING_LABEL = 'Transcribing...';
+
     const apiKeySettingMenuItem = document.querySelector('.uk-navbar-dropdown-nav a[href="#"]'); // "API Key Settings" menu item
+    const recordButton = document.getElementById('record-button');
+    const timerDisplay = document.getElementById('timer');
+    const transcriptionResult = document.getElementById('transcription-result');
+    const copyButton = document.getElementById('copy-button');
+    const refineIcon = document.getElementById('refine-icon');
+    const refineSpinner = document.getElementById('refine-spinner');
+    const languageSelect = document.getElementById('language-select');
+
+    let isRecording = false;
+    let mediaRecorder;
+    let audioChunks = [];
+    let timerInterval;
+    let startTime;
+
+    function updateControlState() {
+        const hasText = transcriptionResult.value.trim().length > 0;
+        copyButton.disabled = !hasText;
+        refineIcon.hidden    = !hasText;
+    }
+    // Update control state when updated manually
+    transcriptionResult.addEventListener('input', updateControlState);
 
     // Function to open settings modal
     const openSettingsModal = () => {
@@ -15,19 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedText = localStorage.getItem('voice-note-transcription');
         if (savedText) {
             document.getElementById('transcription-result').value = savedText;
+            updateControlState();
         }
     };
     
     restoreTranscriptionFromLocalStorage();
-    
-    const checkAndShowRefineIcon = () => {
-        if (document.getElementById('refine-icon') && document.getElementById('transcription-result')) {
-            const text = document.getElementById('transcription-result').value.trim();
-            document.getElementById('refine-icon').hidden = !text;
-        }
-    };
-    
-    setTimeout(checkAndShowRefineIcon, 100);
     
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {
@@ -37,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     window.addEventListener('pagehide', saveTranscriptionToLocalStorage);
     window.addEventListener('beforeunload', saveTranscriptionToLocalStorage);
+
 
     let prompts = null;
     fetch('prompts.json')
@@ -66,24 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault(); // Prevent default link behavior
         openSettingsModal(); // Open settings modal
     });
-
-    const START_RECORDING_LABEL = 'Start Recording';
-    const STOP_RECORDING_LABEL = 'Stop Recording';
-    const TRANSCRIBING_LABEL = 'Transcribing...';
-
-    const recordButton = document.getElementById('record-button');
-    const timerDisplay = document.getElementById('timer');
-    const transcriptionResult = document.getElementById('transcription-result');
-    const copyButton = document.getElementById('copy-button');
-    const refineIcon = document.getElementById('refine-icon');
-    const refineSpinner = document.getElementById('refine-spinner');
-    const languageSelect = document.getElementById('language-select');
-
-    let isRecording = false;
-    let mediaRecorder;
-    let audioChunks = [];
-    let timerInterval;
-    let startTime;
 
     // Resizing of transcription result area
     transcriptionResult.addEventListener('input', autoResize);
@@ -239,8 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             recordButton.disabled = false;
             recordButton.textContent = START_RECORDING_LABEL;
-            copyButton.disabled = false; // Enable copy button when transcription is successful
-            refineIcon.hidden = false; // Show refine icon when transcription is successful
+            updateControlState(); // Update control state after transcription
         })
         .catch(error => {
             console.error('Transcription fetch/processing error:', error); // Log error to console
@@ -248,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             UIkit.modal.alert(`Transcription failed: ${error.message}`);
             recordButton.disabled = false;
             recordButton.textContent = START_RECORDING_LABEL;
-            copyButton.disabled = true; // Disable copy button
+            updateControlState(); // Update control state after transcription
         });
     }
 
@@ -373,6 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
         transcriptionResult.value = ''; // Clear transcription text
         localStorage.removeItem('voice-note-transcription'); // Also clear from localStorage
         autoResize.call(transcriptionResult); // Adjust height after clearing
+        updateControlState(); // Update control state after clearing
     });
     
     refineIcon.addEventListener('click', refineTranscription);
