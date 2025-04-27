@@ -12,16 +12,16 @@ body {
     font-family: sans-serif;
     min-height: 100vh;
     margin: 0;
-    padding: 20px;
+    padding: 1.25rem;
     background-color: #f0f0f0;
 }
 
 #app {
     background-color: #fff;
-    margin: 20px auto 0;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 1.25rem auto 0;
+    padding: 1.875rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.1);
     text-align: center;
     max-width: 1200px;
     width: 100%;
@@ -34,13 +34,13 @@ body {
 }
 
 #api-key-config, #main-area {
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
 }
 
 input[type="password"], input[type="text"], select, button {
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 4px;
+    padding: 0.625rem;
+    margin: 0.3125rem 0;
+    border-radius: 0.25rem;
     border: 1px solid #ccc;
     box-sizing: border-box;
 }
@@ -62,17 +62,17 @@ button:disabled {
 }
 
 #timer {
-    font-size: 1.5em;
-    margin-top: 10px;
-    margin-bottom: 20px;
+    font-size: 1.5rem;
+    margin-top: 0.625rem;
+    margin-bottom: 1.25rem;
 }
 
 #transcription-result {
     border: 1px solid #ccc;
-    padding: 15px;
-    border-radius: 4px;
-    margin-top: 10px;
-    min-height: 100px;
+    padding: 0.9375rem;
+    border-radius: 0.25rem;
+    margin-top: 0.625rem;
+    min-height: 6.25rem;
     height: auto;
     text-align: left;
     white-space: pre-wrap;
@@ -87,8 +87,123 @@ button:disabled {
   
 .icon-area {
     position: absolute;
-    right: 20px;
-    bottom: 10px;
+    right: 1.25rem;
+    bottom: 0.625rem;
     display: flex;
-    gap: 12px;
+    gap: 0.75rem;
+}
+
+/* Notes List Styles */
+#notes-list {
+    margin-top: 1.25rem;
+}
+
+.uk-card-hover {
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+    border-radius: 0.5rem;
+}
+
+.uk-card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.note-preview {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 4.5rem;
+    line-height: 1.5;
+}
+
+.note-delete-icon {
+    color: #f0506e;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.note-delete-icon:hover {
+    color: #ee395b;
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.uk-card-badge {
+    top: 0.9375rem;
+    right: 0.9375rem;
+}
+
+/* Tab Styles */
+#main-tabs {
+    margin-bottom: 0;
+}
+
+/* Modal Styles */
+#save-modal .uk-modal-dialog {
+    border-radius: 8px;
+}
+
+#save-modal .uk-modal-title {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+/* Note card style improvements */
+.uk-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.uk-card-body {
+    background-color: #fafafa;
+}
+
+.uk-card-footer {
+    border-top: 1px solid #f0f0f0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+    body {
+        padding: 0.75rem;
+    }
+    
+    #app {
+        padding: 1.25rem;
+        margin-top: 0.75rem;
+    }
+    
+    .uk-card-header {
+        padding: 0.9375rem 0.9375rem 0;
+    }
+    
+    .uk-card-body {
+        padding: 0.9375rem;
+    }
+    
+    .uk-card-footer {
+        padding: 0 0.9375rem 0.9375rem;
+    }
+    
+    /* Set card width to 100% on mobile */
+    #notes-list > div {
+        width: 100% !important;
+    }
+    
+    #timer {
+        font-size: 1.25rem;
+    }
+}
+
+/* タブレット向け調整 */
+@media (min-width: 641px) and (max-width: 960px) {
+    #notes-list > div {
+        width: 50% !important;
+    }
 }

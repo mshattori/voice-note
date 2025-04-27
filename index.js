@@ -1,3 +1,5 @@
+import { initNotesModule } from './notes.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const START_RECORDING_LABEL = 'Start Recording';
     const STOP_RECORDING_LABEL = 'Stop Recording';
@@ -376,4 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     refineIcon.addEventListener('click', refineTranscription);
+    
+    // Initialize the notes module
+    initNotesModule();
 });
