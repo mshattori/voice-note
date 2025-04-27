@@ -73,8 +73,10 @@ button:disabled {
     border-radius: 4px;
     margin-top: 10px;
     min-height: 100px;
+    height: auto;
     text-align: left;
     white-space: pre-wrap;
+    overflow-y: hidden;   /* Hide vertical scrollbar */
 }
 
 .textarea-wrapper {

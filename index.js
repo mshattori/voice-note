@@ -85,6 +85,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let timerInterval;
     let startTime;
 
+    // Resizing of transcription result area
+    transcriptionResult.addEventListener('input', autoResize);
+
+    function autoResize() {
+        // Get the scrollHeight after resetting the height by auto
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    }
+
     recordButton.addEventListener('click', () => {
         if (!isRecording) {
             startRecording();
@@ -223,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check if data and data.text exist
             if (data && data.text) {
                 transcriptionResult.textContent += (transcriptionResult.textContent ? '\n\n' : '') + data.text;
+                autoResize.call(transcriptionResult)
             } else {
                 console.warn('Transcription API returned success but no text:', data);
                 UIkit.modal.alert('Transcription failed: No text returned from API.'); // Display error message using UIkit modal
@@ -339,6 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error('Invalid response format from API.');
                 }
                 transcriptionResult.textContent = responseContent.refined_text;
+                autoResize.call(transcriptionResult)
                 // UIkit.notification('Text has been refined.', { status: 'success' });
             } catch (error) {
                 console.error('Error parsing API response:', error);
