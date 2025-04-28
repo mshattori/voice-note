@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS S3 Settings</title>
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.21.16/dist/css/uikit.min.css" />
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+<div id="aws-s3-config" class="uk-form-stacked">
+    <div class="uk-margin">
+        <label class="uk-form-label" for="aws-access-key-id">AWS Access Key ID:</label>
+        <div class="uk-form-controls">
+            <input class="uk-input" type="password" id="aws-access-key-id" name="aws-access-key-id">
+        </div>
+    </div>
+    <div class="uk-margin">
+        <label class="uk-form-label" for="aws-secret-access-key">AWS Secret Access Key:</label>
+        <div class="uk-form-controls">
+            <input class="uk-input" type="password" id="aws-secret-access-key" name="aws-secret-access-key">
+        </div>
+    </div>
+    <div class="uk-margin">
+        <label class="uk-form-label" for="aws-region">AWS Region:</label>
+        <div class="uk-form-controls">
+            <input class="uk-input" type="text" id="aws-region" name="aws-region" value="us-east-1">
+        </div>
+    </div>
+    <div class="uk-margin">
+        <label class="uk-form-label" for="s3-bucket-name">S3 Bucket Name:</label>
+        <div class="uk-form-controls">
+            <input class="uk-input" type="text" id="s3-bucket-name" name="s3-bucket-name">
+        </div>
+    </div>
+    <button class="uk-button uk-button-primary" id="save-aws-settings">Save</button>
+</div>
+    <!-- UIkit JS -->
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.16/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.16/dist/js/uikit-icons.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const accessKeyInput = document.getElementById('aws-access-key-id');
+            const secretKeyInput = document.getElementById('aws-secret-access-key');
+            const regionInput = document.getElementById('aws-region');
+            const bucketNameInput = document.getElementById('s3-bucket-name');
+            const saveButton = document.getElementById('save-aws-settings');
+
+            // Load values from localStorage
+            accessKeyInput.value = localStorage.getItem('aws-access-key-id') || '';
+            secretKeyInput.value = localStorage.getItem('aws-secret-access-key') || '';
+            regionInput.value = localStorage.getItem('aws-region') || 'us-east-1';
+            bucketNameInput.value = localStorage.getItem('s3-bucket-name') || '';
+
+            // Save AWS settings to localStorage
+            saveButton.addEventListener('click', () => {
+                const accessKey = accessKeyInput.value;
+                const secretKey = secretKeyInput.value;
+                const region = regionInput.value;
+                const bucketName = bucketNameInput.value;
+                
+                localStorage.setItem('aws-access-key-id', accessKey);
+                localStorage.setItem('aws-secret-access-key', secretKey);
+                localStorage.setItem('aws-region', region);
+                localStorage.setItem('s3-bucket-name', bucketName);
+                
+                UIkit.notification('AWS S3 Settings saved successfully', { status: 'success' });
+            });
+        });
+    </script>
+</body>
+</html>
