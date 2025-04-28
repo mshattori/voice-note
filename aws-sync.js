@@ -8,12 +8,51 @@
  * @returns {Object} The sync module API
  */
 export function initAwsS3SyncModule() {
-    const syncIcon = document.getElementById('sync-icon');
     const syncSpinner = document.getElementById('sync-spinner');
     
-    syncIcon.addEventListener('click', () => {
-        syncWithS3();
+    let deletedNotes = JSON.parse(localStorage.getItem('aws-deleted-notes') || '[]');
+    
+    let lastSyncTime = localStorage.getItem('aws-last-sync-time') || null;
+    
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'aws-access-key-id' || 
+            event.key === 'aws-secret-access-key' || 
+            event.key === 'aws-region' || 
+            event.key === 'aws-s3-bucket-name') {
+            
+            const s3 = configureAWS();
+            if (s3) {
+                syncWithS3(true);
+            }
+        }
     });
+    
+    document.addEventListener('note-created', () => syncWithS3(false));
+    document.addEventListener('note-updated', () => syncWithS3(false));
+    document.addEventListener('note-deleted', (e) => {
+        if (e.detail && e.detail.noteId) {
+            addDeletedNote(e.detail.noteId);
+        }
+        syncWithS3(false);
+    });
+    
+    UIkit.util.on('#main-tabs', 'shown', function(e) {
+        if (e.target.textContent.trim() === 'Notes List') {
+            syncWithS3(true);
+        }
+    });
+    
+    /**
+     * Add a note ID to the deleted notes list
+     * @param {string} noteId - The ID of the deleted note
+     */
+    const addDeletedNote = (noteId) => {
+        deletedNotes.push({
+            id: noteId,
+            deletedAt: new Date().toISOString()
+        });
+        localStorage.setItem('aws-deleted-notes', JSON.stringify(deletedNotes));
+    };
     
     /**
      * Configure AWS SDK with credentials from localStorage
@@ -43,33 +82,33 @@ export function initAwsS3SyncModule() {
     /**
      * Synchronize notes with S3
      * This performs a two-way sync: first download from S3, then upload to S3
+     * @param {boolean} showNotifications - Whether to show notifications
      */
-    const syncWithS3 = () => {
-        syncIcon.hidden = true;
+    const syncWithS3 = (showNotifications = true) => {
         syncSpinner.hidden = false;
         
         const s3 = configureAWS();
         if (!s3) {
-            UIkit.modal.alert('Please configure AWS S3 settings first.');
-            syncIcon.hidden = false;
             syncSpinner.hidden = true;
             return;
         }
         
-        downloadFromS3(s3)
-            .then(() => uploadToS3(s3))
+        downloadFromS3(s3, showNotifications)
+            .then(() => uploadChangesToS3(s3, showNotifications))
             .finally(() => {
-                syncIcon.hidden = false;
                 syncSpinner.hidden = true;
+                lastSyncTime = new Date().toISOString();
+                localStorage.setItem('aws-last-sync-time', lastSyncTime);
             });
     };
     
     /**
      * Download notes from S3
      * @param {AWS.S3} s3 - Configured S3 client
+     * @param {boolean} showNotifications - Whether to show notifications
      * @returns {Promise} Promise that resolves when download is complete
      */
-    const downloadFromS3 = (s3) => {
+    const downloadFromS3 = (s3, showNotifications) => {
         return new Promise((resolve, reject) => {
             const bucketName = localStorage.getItem('s3-bucket-name');
             const params = {
@@ -80,11 +119,15 @@ export function initAwsS3SyncModule() {
             s3.getObject(params, (err, data) => {
                 if (err) {
                     if (err.code === 'NoSuchKey') {
-                        UIkit.notification('No notes found on S3.', { status: 'warning' });
+                        if (showNotifications) {
+                            UIkit.notification('No notes found on S3.', { status: 'warning' });
+                        }
                         resolve(); // Continue with upload
                     } else {
                         console.error('Error downloading from S3:', err);
-                        UIkit.notification(`S3 download failed: ${err.message}`, { status: 'danger' });
+                        if (showNotifications) {
+                            UIkit.notification(`S3 download failed: ${err.message}`, { status: 'danger' });
+                        }
                         reject(err);
                     }
                 } else {
@@ -97,6 +140,10 @@ export function initAwsS3SyncModule() {
                         
                         const downloadPromises = [];
                         for (const note of s3Notes) {
+                            if (deletedNotes.some(deletedNote => deletedNote.id === note.id)) {
+                                continue;
+                            }
+                            
                             if (!localStorage.getItem(note.filePath)) {
                                 downloadPromises.push(downloadNoteContent(s3, note.filePath));
                             }
@@ -104,7 +151,9 @@ export function initAwsS3SyncModule() {
                         
                         Promise.all(downloadPromises)
                             .then(() => {
-                                UIkit.notification('Notes synchronized from S3.', { status: 'success' });
+                                if (showNotifications && downloadPromises.length > 0) {
+                                    UIkit.notification('Notes synchronized from S3.', { status: 'success' });
+                                }
                                 document.dispatchEvent(new CustomEvent('notes-updated'));
                                 resolve();
                             })
@@ -114,7 +163,9 @@ export function initAwsS3SyncModule() {
                             });
                     } catch (e) {
                         console.error('Error parsing S3 data:', e);
-                        UIkit.notification(`Error parsing S3 data: ${e.message}`, { status: 'danger' });
+                        if (showNotifications) {
+                            UIkit.notification(`Error parsing S3 data: ${e.message}`, { status: 'danger' });
+                        }
                         reject(e);
                     }
                 }
@@ -149,53 +200,158 @@ export function initAwsS3SyncModule() {
     };
     
     /**
-     * Upload notes to S3
+     * Upload changed notes to S3
      * @param {AWS.S3} s3 - Configured S3 client
+     * @param {boolean} showNotifications - Whether to show notifications
      * @returns {Promise} Promise that resolves when upload is complete
      */
-    const uploadToS3 = (s3) => {
+    const uploadChangesToS3 = (s3, showNotifications) => {
         return new Promise((resolve, reject) => {
             const notes = JSON.parse(localStorage.getItem('noteList') || '[]');
-            if (notes.length === 0) {
-                UIkit.notification('No notes to upload.', { status: 'warning' });
+            if (notes.length === 0 && deletedNotes.length === 0) {
+                if (showNotifications) {
+                    UIkit.notification('No notes to upload.', { status: 'warning' });
+                }
                 resolve();
                 return;
             }
             
             const bucketName = localStorage.getItem('s3-bucket-name');
             
-            const listParams = {
-                Bucket: bucketName,
-                Key: 'voice-notes.json',
-                Body: JSON.stringify(notes),
-                ContentType: 'application/json'
-            };
+            const deletePromises = [];
+            if (deletedNotes.length > 0) {
+                for (const deletedNote of deletedNotes) {
+                    deletePromises.push(deleteNoteFromS3(s3, deletedNote.id));
+                }
+            }
             
-            s3.putObject(listParams, (err, data) => {
+            Promise.all(deletePromises)
+                .then(() => {
+                    if (deletePromises.length > 0) {
+                        deletedNotes = [];
+                        localStorage.setItem('aws-deleted-notes', JSON.stringify(deletedNotes));
+                    }
+                    
+                    const notesToUpload = lastSyncTime 
+                        ? notes.filter(note => !lastSyncTime || new Date(note.updatedAt) > new Date(lastSyncTime))
+                        : notes;
+                    
+                    if (notesToUpload.length === 0) {
+                        const listParams = {
+                            Bucket: bucketName,
+                            Key: 'voice-notes.json',
+                            Body: JSON.stringify(notes),
+                            ContentType: 'application/json'
+                        };
+                        
+                        s3.putObject(listParams, (err, data) => {
+                            if (err) {
+                                console.error('Error uploading note list to S3:', err);
+                                if (showNotifications) {
+                                    UIkit.notification(`S3 upload failed: ${err.message}`, { status: 'danger' });
+                                }
+                                reject(err);
+                            } else {
+                                resolve();
+                            }
+                        });
+                        return;
+                    }
+                    
+                    const listParams = {
+                        Bucket: bucketName,
+                        Key: 'voice-notes.json',
+                        Body: JSON.stringify(notes),
+                        ContentType: 'application/json'
+                    };
+                    
+                    s3.putObject(listParams, (err, data) => {
+                        if (err) {
+                            console.error('Error uploading note list to S3:', err);
+                            if (showNotifications) {
+                                UIkit.notification(`S3 upload failed: ${err.message}`, { status: 'danger' });
+                            }
+                            reject(err);
+                            return;
+                        }
+                        
+                        const uploadPromises = [];
+                        for (const note of notesToUpload) {
+                            const content = localStorage.getItem(note.filePath);
+                            if (content) {
+                                uploadPromises.push(uploadNoteContent(s3, note.filePath, content));
+                            }
+                        }
+                        
+                        Promise.all(uploadPromises)
+                            .then(() => {
+                                if (showNotifications && (uploadPromises.length > 0 || deletePromises.length > 0)) {
+                                    UIkit.notification('Notes synchronized to S3.', { status: 'success' });
+                                }
+                                resolve();
+                            })
+                            .catch(error => {
+                                console.error('Error uploading note contents:', error);
+                                reject(error);
+                            });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error deleting notes from S3:', error);
+                    reject(error);
+                });
+        });
+    };
+    
+    /**
+     * Delete a note from S3
+     * @param {AWS.S3} s3 - Configured S3 client
+     * @param {string} noteId - The ID of the note to delete
+     * @returns {Promise} Promise that resolves when deletion is complete
+     */
+    const deleteNoteFromS3 = (s3, noteId) => {
+        return new Promise((resolve, reject) => {
+            const bucketName = localStorage.getItem('s3-bucket-name');
+            
+            s3.getObject({
+                Bucket: bucketName,
+                Key: 'voice-notes.json'
+            }, (err, data) => {
                 if (err) {
-                    console.error('Error uploading note list to S3:', err);
-                    UIkit.notification(`S3 upload failed: ${err.message}`, { status: 'danger' });
-                    reject(err);
+                    if (err.code === 'NoSuchKey') {
+                        resolve();
+                    } else {
+                        console.error('Error getting note list from S3:', err);
+                        reject(err);
+                    }
                     return;
                 }
                 
-                const uploadPromises = [];
-                for (const note of notes) {
-                    const content = localStorage.getItem(note.filePath);
-                    if (content) {
-                        uploadPromises.push(uploadNoteContent(s3, note.filePath, content));
-                    }
-                }
-                
-                Promise.all(uploadPromises)
-                    .then(() => {
-                        UIkit.notification('Notes synchronized to S3.', { status: 'success' });
+                try {
+                    const s3Notes = JSON.parse(data.Body.toString());
+                    const noteToDelete = s3Notes.find(note => note.id === noteId);
+                    
+                    if (!noteToDelete) {
                         resolve();
-                    })
-                    .catch(error => {
-                        console.error('Error uploading note contents:', error);
-                        reject(error);
+                        return;
+                    }
+                    
+                    // Delete the note content
+                    s3.deleteObject({
+                        Bucket: bucketName,
+                        Key: noteToDelete.filePath
+                    }, (err, data) => {
+                        if (err) {
+                            console.error(`Error deleting note content for ${noteToDelete.filePath}:`, err);
+                            reject(err);
+                        } else {
+                            resolve();
+                        }
                     });
+                } catch (e) {
+                    console.error('Error parsing S3 note list:', e);
+                    reject(e);
+                }
             });
         });
     };
@@ -242,6 +398,10 @@ export function initAwsS3SyncModule() {
         });
         
         s3Notes.forEach(s3Note => {
+            if (deletedNotes.some(deletedNote => deletedNote.id === s3Note.id)) {
+                return;
+            }
+            
             if (!notesMap.has(s3Note.id) || 
                 new Date(s3Note.updatedAt) > new Date(notesMap.get(s3Note.id).updatedAt)) {
                 notesMap.set(s3Note.id, s3Note);
@@ -251,6 +411,11 @@ export function initAwsS3SyncModule() {
         return Array.from(notesMap.values())
             .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
     };
+    
+    const s3 = configureAWS();
+    if (s3) {
+        setTimeout(() => syncWithS3(false), 1000);
+    }
     
     return {
         syncWithS3

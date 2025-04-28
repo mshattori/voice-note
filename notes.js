@@ -181,6 +181,10 @@ export function createNote(title, content) {
     // Refresh the note list display
     loadNoteList();
     
+    document.dispatchEvent(new CustomEvent('note-created', {
+        detail: { noteId: id }
+    }));
+    
     return id;
 }
 
@@ -217,6 +221,10 @@ export function updateNote(id, title, content) {
     // Refresh the note list display
     loadNoteList();
     
+    document.dispatchEvent(new CustomEvent('note-updated', {
+        detail: { noteId: id }
+    }));
+    
     return true;
 }
 
@@ -252,6 +260,10 @@ export function deleteNote(id) {
     
     // Refresh the note list display
     loadNoteList();
+    
+    document.dispatchEvent(new CustomEvent('note-deleted', {
+        detail: { noteId: id }
+    }));
     
     // Show success notification
     UIkit.notification('Note deleted successfully', { status: 'success' });
