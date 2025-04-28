@@ -25,7 +25,7 @@
     <div class="uk-margin">
         <label class="uk-form-label" for="aws-region">AWS Region:</label>
         <div class="uk-form-controls">
-            <input class="uk-input" type="text" id="aws-region" name="aws-region" value="us-east-1">
+            <input class="uk-input" type="text" id="aws-region" name="aws-region" value="ap-northeast-1">
         </div>
     </div>
     <div class="uk-margin">
@@ -50,7 +50,7 @@
             // Load values from localStorage
             accessKeyInput.value = localStorage.getItem('aws-access-key-id') || '';
             secretKeyInput.value = localStorage.getItem('aws-secret-access-key') || '';
-            regionInput.value = localStorage.getItem('aws-region') || 'us-east-1';
+            regionInput.value = localStorage.getItem('aws-region') || 'ap-northeast-1';
             bucketNameInput.value = localStorage.getItem('s3-bucket-name') || '';
 
             // Save AWS settings to localStorage
