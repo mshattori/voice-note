@@ -16,10 +16,33 @@ export function initNotesModule() {
     const noteTitleInput = document.getElementById('note-title');
     const mainTabs = document.getElementById('main-tabs');
     
+    // Current editing note ID (when in edit mode)
+    let currentEditingNoteId = null;
+    
     // Set up event listeners
     saveIcon.addEventListener('click', () => {
-        // Reset the title input and open the save modal
-        noteTitleInput.value = '';
+        const transcriptionResult = document.getElementById('transcription-result');
+        const content = transcriptionResult.value.trim();
+        
+        if (!content) {
+            UIkit.notification('There is no content to save', { status: 'warning' });
+            return;
+        }
+        
+        if (currentEditingNoteId) {
+            // In edit mode, display the current note title
+            const notes = getNoteList();
+            const note = notes.find(note => note.id === currentEditingNoteId);
+            if (note) {
+                noteTitleInput.value = note.title;
+            } else {
+                noteTitleInput.value = '';
+            }
+        } else {
+            // In create mode, reset the title input
+            noteTitleInput.value = '';
+        }
+        
         UIkit.modal(saveModal).show();
     });
     
@@ -37,16 +60,27 @@ export function initNotesModule() {
             return;
         }
         
-        // Create a new note
-        createNote(title, content);
+        if (currentEditingNoteId) {
+            // Update existing note
+            updateNote(currentEditingNoteId, title, content);
+            
+            // Reset edit mode
+            currentEditingNoteId = null;
+            
+            // Success notification
+            UIkit.notification('Note updated successfully', { status: 'success' });
+        } else {
+            // Create new note
+            createNote(title, content);
+            
+            // Success notification
+            UIkit.notification('Note saved successfully', { status: 'success' });
+        }
         
         // Close the modal
         UIkit.modal(saveModal).hide();
         
-        // Show success notification
-        UIkit.notification('Note saved successfully', { status: 'success' });
-        
-        // Switch to the notes list tab
+        // Switch to notes list tab
         UIkit.tab(mainTabs).show(1);
     });
     
@@ -81,6 +115,10 @@ export function initNotesModule() {
             const noteId = noteCard.dataset.noteId;
             openNoteEditor(noteId);
         }
+    });
+    // Listen for note edit events
+    document.addEventListener('edit-note', (e) => {
+        currentEditingNoteId = e.detail.noteId;
     });
 }
 
@@ -298,79 +336,22 @@ export function openNoteEditor(id) {
     const transcriptionResult = document.getElementById('transcription-result');
     transcriptionResult.value = content;
     
-    // Trigger the input event to resize the textarea
-    const inputEvent = new Event('input', {
-        bubbles: true,
-        cancelable: true,
-    });
-    transcriptionResult.dispatchEvent(inputEvent);
-    
-    // Create or update the edit button
-    let editButton = document.getElementById('edit-note-btn');
-    if (!editButton) {
-        // Create the edit button if it doesn't exist
-        editButton = document.createElement('button');
-        editButton.id = 'edit-note-btn';
-        editButton.className = 'uk-button uk-button-primary';
-        editButton.textContent = 'Update Note';
-        
-        // Insert the button after the clear button
-        const clearButton = document.getElementById('clear-button');
-        clearButton.parentNode.insertBefore(editButton, clearButton.nextSibling);
-    }
-    
-    // Remove any existing event listeners
-    const newEditButton = editButton.cloneNode(true);
-    editButton.parentNode.replaceChild(newEditButton, editButton);
-    editButton = newEditButton;
-    
-    // Add event listener for the edit button
-    editButton.addEventListener('click', () => {
-        // Show the save modal with the current title
-        const noteTitleInput = document.getElementById('note-title');
-        noteTitleInput.value = note.title;
-        
-        // Show the modal
-        UIkit.modal(document.getElementById('save-modal')).show();
-        
-        // Update the save button to handle updates
-        const saveNoteBtn = document.getElementById('save-note-btn');
-        
-        // Remove any existing event listeners
-        const newSaveNoteBtn = saveNoteBtn.cloneNode(true);
-        saveNoteBtn.parentNode.replaceChild(newSaveNoteBtn, saveNoteBtn);
-        
-        // Add the update event listener
-        newSaveNoteBtn.addEventListener('click', () => {
-            const newTitle = noteTitleInput.value.trim();
-            const newContent = transcriptionResult.value.trim();
-            
-            if (!newTitle) {
-                UIkit.notification('Please enter a title for your note', { status: 'warning' });
-                return;
-            }
-            
-            if (!newContent) {
-                UIkit.notification('There is no content to save', { status: 'warning' });
-                return;
-            }
-            
-            // Update the note
-            updateNote(id, newTitle, newContent);
-            
-            // Close the modal
-            UIkit.modal(document.getElementById('save-modal')).hide();
-            
-            // Show success notification
-            UIkit.notification('Note updated successfully', { status: 'success' });
-            
-            // Switch to the notes list tab
-            UIkit.tab(document.getElementById('main-tabs')).show(1);
-        }, { once: true });
-    });
+    // Update currentEditingNoteId in initNotesModule
+    document.dispatchEvent(new CustomEvent('edit-note', {
+        detail: { noteId: id }
+    }));
     
     // Switch to the main tab
     UIkit.tab(document.getElementById('main-tabs')).show(0);
+    
+    // Trigger the input event to resize the textarea after switching to MAIN tab
+    setTimeout(() => {
+        const inputEvent = new Event('input', {
+            bubbles: true,
+            cancelable: true,
+        });
+        transcriptionResult.dispatchEvent(inputEvent);
+    }, 100);
 }
 
 /**
