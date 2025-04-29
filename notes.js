@@ -10,7 +10,7 @@
  */
 export function initNotesModule() {
     // Get DOM elements
-    const saveIcon = document.getElementById('save-icon');
+    const saveButton = document.getElementById('save-button');
     const saveNoteBtn = document.getElementById('save-note-btn');
     const saveModal = document.getElementById('save-modal');
     const noteTitleInput = document.getElementById('note-title');
@@ -20,7 +20,7 @@ export function initNotesModule() {
     let currentEditingNoteId = null;
     
     // Set up event listeners
-    saveIcon.addEventListener('click', () => {
+    saveButton.addEventListener('click', () => {
         const transcriptionResult = document.getElementById('transcription-result');
         const content = transcriptionResult.value.trim();
         

@@ -407,8 +407,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const clearButton = document.getElementById('clear-button');
-    clearButton.addEventListener('click', () => {
+    const clearIcon = document.getElementById('clear-icon');
+    clearIcon.addEventListener('click', () => {
         transcriptionResult.value = ''; // Clear transcription text
         localStorage.removeItem('voice-note-transcription'); // Also clear from localStorage
         timerDisplay.textContent = '00:00'; // Reset timer display

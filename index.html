@@ -61,16 +61,16 @@
                     <div class="textarea-wrapper">
                         <textarea id="transcription-result" class="uk-textarea" contenteditable="true"></textarea>
                         <div class="icon-area">
+                            <span id="clear-icon" uk-icon="icon: close" uk-tooltip="Clear"></span>
                             <span id="refine-icon" uk-icon="icon: refresh" uk-tooltip="Refine by AI"></span>
                             <!-- Spinner (hidden by default) -->
                             <div id="refine-spinner" uk-spinner="ratio: 0.8" hidden></div>
                             <!-- AWS S3 sync spinner (hidden by default) -->
                             <div id="sync-spinner" uk-spinner="ratio: 0.8" hidden></div>
-                            <span id="save-icon" uk-icon="icon: folder" uk-tooltip="Save"></span>
                         </div>
                     </div>
                     <button class="uk-button uk-button-secondary" id="copy-button" disabled>Copy</button>
-                    <button class="uk-button uk-button-default" id="clear-button">Clear</button>
+                    <button class="uk-button uk-button-default" id="save-button">Save</button>
                 </div>
             </li>
             
