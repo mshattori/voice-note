@@ -138,6 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function startRecording() {
+        if (!localStorage.getItem('apiKey')) {
+            UIkit.modal.alert('Please set your API key in the settings first.'); // Display error message using UIkit modal
+            return;
+        }
+
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(stream => {
                 mediaRecorder = new MediaRecorder(stream);

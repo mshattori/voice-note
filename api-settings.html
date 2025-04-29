@@ -56,7 +56,8 @@
                 localStorage.setItem('apiKey', apiKey);
                 localStorage.setItem('baseURL', baseURL);
                 localStorage.setItem('model-select', selectedModel);
-                alert('Saved API Key, Base URL and Model');
+
+                UIkit.notification('OpenAI Settings saved successfully', { status: 'success' });
             });
         });
     </script>
