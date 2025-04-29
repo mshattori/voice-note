@@ -80,8 +80,18 @@ export function initNotesModule() {
         // Close the modal
         UIkit.modal(saveModal).hide();
         
-        // Switch to notes list tab
-        UIkit.tab(mainTabs).show(1);
+        // Clear the text area
+        document.getElementById('transcription-result').value = '';
+        
+        // Trigger input event to resize the textarea and update control state
+        const inputEvent = new Event('input', {
+            bubbles: true,
+            cancelable: true,
+        });
+        document.getElementById('transcription-result').dispatchEvent(inputEvent);
+        
+        // Clear from localStorage
+        localStorage.removeItem('voice-note-transcription');
     });
     
     // Load the note list when the notes tab is shown
