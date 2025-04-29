@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyButton = document.getElementById('copy-button');
     const refineIcon = document.getElementById('refine-icon');
     const refineSpinner = document.getElementById('refine-spinner');
-    const syncSpinner = document.getElementById('sync-spinner');
     const languageSelect = document.getElementById('language-select');
 
     let isRecording = false;
