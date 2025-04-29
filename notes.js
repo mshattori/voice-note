@@ -118,9 +118,14 @@ export function loadNoteList() {
         const noteContent = localStorage.getItem(note.filePath) || '';
         const previewText = noteContent.substring(0, 150) + (noteContent.length > 150 ? '...' : '');
         
-        // Format the date
+        // Format the date as year/month/date hour:minutes
         const createdDate = new Date(note.createdAt);
-        const formattedDate = createdDate.toLocaleDateString();
+        const year = createdDate.getFullYear();
+        const month = String(createdDate.getMonth() + 1).padStart(2, '0');
+        const date = String(createdDate.getDate()).padStart(2, '0');
+        const hours = String(createdDate.getHours()).padStart(2, '0');
+        const minutes = String(createdDate.getMinutes()).padStart(2, '0');
+        const formattedDate = `${year}/${month}/${date} ${hours}:${minutes}`;
         
         // Create the note card
         const noteCard = document.createElement('div');
@@ -128,16 +133,14 @@ export function loadNoteList() {
         noteCard.innerHTML = `
             <div class="uk-card uk-card-default uk-card-hover uk-box-shadow-small">
                 <div class="uk-card-header">
-                    <h3 class="uk-card-title uk-margin-remove-bottom">${escapeHtml(note.title)}</h3>
-                    <div class="uk-card-badge">
-                        <span uk-icon="icon: trash" class="note-delete-icon" uk-tooltip="Delete"></span>
-                    </div>
+                    <h3 class="uk-card-title uk-margin-remove-bottom uk-text-left">${escapeHtml(note.title)}</h3>
                 </div>
                 <div class="uk-card-body uk-padding-small">
-                    <p class="note-preview">${escapeHtml(previewText)}</p>
+                    <p class="note-preview uk-text-left">${escapeHtml(previewText)}</p>
                 </div>
-                <div class="uk-card-footer uk-padding-small">
-                    <small class="uk-text-muted">Created on ${formattedDate}</small>
+                <div class="uk-card-footer uk-padding-small uk-flex uk-flex-between uk-flex-middle">
+                    <small class="uk-text-muted">${formattedDate}</small>
+                    <span uk-icon="icon: trash" class="note-delete-icon" uk-tooltip="Delete" style="color: inherit;"></span>
                 </div>
             </div>
         `;
