@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h2 class="uk-modal-title">OpenAI API Settings</h2>
                 </div>
                 <div class="uk-modal-body">
-                    <iframe src="api-settings.html" width="100%" height="300px"></iframe>
+                    <iframe src="api-settings.html" width="100%" height="450px"></iframe>
                 </div>
             </div>
         </div>`
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h2 class="uk-modal-title">AWS S3 Settings</h2>
                 </div>
                 <div class="uk-modal-body">
-                    <iframe src="aws-settings.html" width="100%" height="350px"></iframe>
+                    <iframe src="aws-settings.html" width="100%" height="500px"></iframe>
                 </div>
             </div>
         </div>`
