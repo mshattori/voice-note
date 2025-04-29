@@ -406,6 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
     clearButton.addEventListener('click', () => {
         transcriptionResult.value = ''; // Clear transcription text
         localStorage.removeItem('voice-note-transcription'); // Also clear from localStorage
+        timerDisplay.textContent = '00:00'; // Reset timer display
         autoResize.call(transcriptionResult); // Adjust height after clearing
         updateControlState(); // Update control state after clearing
     });
