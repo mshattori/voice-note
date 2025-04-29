@@ -31,14 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
     transcriptionResult.addEventListener('input', updateControlState);
 
     const saveTranscriptionToLocalStorage = () => {
-        const transcriptionText = document.getElementById('transcription-result').value;
+        const transcriptionText = transcriptionResult.value;
         localStorage.setItem('voice-note-transcription', transcriptionText);
     };
     
     const restoreTranscriptionFromLocalStorage = () => {
         const savedText = localStorage.getItem('voice-note-transcription');
         if (savedText) {
-            document.getElementById('transcription-result').value = savedText;
+            transcriptionResult.value = savedText;
+            autoResize.call(transcriptionResult);
             updateControlState();
         }
     };
