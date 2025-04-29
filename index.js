@@ -31,11 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update control state when updated manually
     transcriptionResult.addEventListener('input', updateControlState);
 
-    // Function to open settings modal
-    const openSettingsModal = () => {
-        settingsModal.show();
-    };
-    
     const saveTranscriptionToLocalStorage = () => {
         const transcriptionText = document.getElementById('transcription-result').value;
         localStorage.setItem('voice-note-transcription', transcriptionText);
@@ -70,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Error loading prompts:', error));
 
     // Create OpenAI settings modal element
-    const settingsModal = UIkit.modal(
+    const apiKeySettingsModal = UIkit.modal(
         `<div id="settings-modal" uk-modal>
             <div class="uk-modal-dialog">
                 <button class="uk-modal-close-default" type="button" uk-close></button>
@@ -78,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h2 class="uk-modal-title">OpenAI API Settings</h2>
                 </div>
                 <div class="uk-modal-body">
-                    <iframe src="settings.html" width="100%" height="300px"></iframe>
+                    <iframe src="api-settings.html" width="100%" height="300px"></iframe>
                 </div>
             </div>
         </div>`
@@ -102,12 +97,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add event listener to "OpenAI API Settings" menu item
     apiKeySettingMenuItem.addEventListener('click', (e) => {
         e.preventDefault(); // Prevent default link behavior
-        openSettingsModal(); // Open settings modal
+
+        // Close the dropdown menu manually (for iOS Chrome) 
+        const dropdown = document.querySelector('.uk-navbar-dropdown');
+        if (dropdown) {
+            UIkit.dropdown(dropdown).hide();
+        }
+        
+        apiKeySettingsModal.show();
     });
     
     // Add event listener to "AWS S3 Settings" menu item
     awsS3SettingMenuItem.addEventListener('click', (e) => {
         e.preventDefault(); // Prevent default link behavior
+        
+        // Close the dropdown menu manually (for iOS Chrome) 
+        const dropdown = document.querySelector('.uk-navbar-dropdown');
+        if (dropdown) {
+            UIkit.dropdown(dropdown).hide();
+        }
+        
         awsSettingsModal.show(); // Open AWS settings modal
     });
 
