@@ -119,8 +119,11 @@ export function initAwsS3SyncModule() {
             s3.getObject(params, (err, data) => {
                 if (err) {
                     if (err.code === 'NoSuchKey') {
+                        // Set lastSyncTime to null to force full upload on next sync
+                        lastSyncTime = null;
+                        localStorage.setItem('aws-last-sync-time', null);
                         if (showNotifications) {
-                            UIkit.notification('No notes found on S3.', { status: 'warning' });
+                            UIkit.notification('No notes found on S3. Full upload will be performed.', { status: 'warning' });
                         }
                         resolve(); // Continue with upload
                     } else {
