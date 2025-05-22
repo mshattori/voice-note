@@ -173,8 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isRecording = false;
         recordButton.textContent = START_RECORDING_LABEL;
         stopTimer();
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        transcribeAudio(audioBlob);
+        transcribeAudio();
     }
 
     function stopRecording() {
@@ -206,7 +205,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function transcribeAudio(audioBlob) {
+    function isIOS() {
+        return /iP(hone|od|ad)/.test(navigator.userAgent);
+    }
+
+    function transcribeAudio() {
         recordButton.disabled = true;
         recordButton.textContent = TRANSCRIBING_LABEL;
 
@@ -223,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let selectedMimeType = 'audio/webm'; // Default MIME type
         let fileName = 'recording.webm';
 
-        if (MediaRecorder.isTypeSupported('audio/webm')) {
+        if (!isIOS() && MediaRecorder.isTypeSupported('audio/webm')) {
             selectedMimeType = 'audio/webm';
             fileName = 'recording.webm';
         } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
