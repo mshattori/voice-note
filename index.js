@@ -332,6 +332,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Blob([buffer], { type: 'audio/wav' });
     }
 
+    function isSupportedUploadFile(file) {
+        if (!file) {
+            return false;
+        }
+        const name = file.name.toLowerCase();
+        const type = (file.type || '').toLowerCase();
+        const byMime = type === 'audio/mpeg' || type === 'audio/mp4' || type === 'audio/x-m4a';
+        const byExt = name.endsWith('.mp3') || name.endsWith('.m4a');
+        return byMime || byExt;
+    }
+
     function requestTranscription(file, language) {
         const apiKey = localStorage.getItem('apiKey');
         const baseURL = localStorage.getItem('baseURL') || 'https://api.openai.com/v1/';
@@ -388,9 +399,8 @@ document.addEventListener('DOMContentLoaded', () => {
             UIkit.notification('Transcription is in progress. Please wait.', { status: 'warning' });
             return;
         }
-        const isMp3 = file.type === 'audio/mpeg' || file.name.toLowerCase().endsWith('.mp3');
-        if (!isMp3) {
-            UIkit.notification('Only MP3 files are supported right now.', { status: 'warning' });
+        if (!isSupportedUploadFile(file)) {
+            UIkit.notification('Only MP3 or M4A files are supported right now.', { status: 'warning' });
             return;
         }
 
