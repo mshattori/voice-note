@@ -6,6 +6,7 @@
     <title>Voice Note</title>
     <!-- UIkit CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.21.16/dist/css/uikit.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
     <!-- UIkit JS -->
     <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.16/dist/js/uikit.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.16/dist/js/uikit-icons.min.js"></script>
@@ -41,6 +42,7 @@
     <div class="uk-container uk-margin-small-top">
         <ul uk-tab="connect: #main-content" id="main-tabs">
             <li class="uk-active"><a href="#">Main</a></li>
+            <li><a href="#">Upload</a></li>
             <li><a href="#">Notes List</a></li>
         </ul>
     </div>
@@ -71,6 +73,94 @@
                     </div>
                     <button class="uk-button uk-button-secondary" id="copy-button" disabled>Copy</button>
                     <button class="uk-button uk-button-default" id="save-button">Save</button>
+                </div>
+            </li>
+
+            <!-- Upload Screen -->
+            <li>
+                <div id="upload-area">
+                    <div class="upload-hero upload-reveal delay-1">
+                        <div>
+                            <h2 class="upload-title">Upload & Transcribe</h2>
+                            <p class="upload-subtitle">Automatic 10-minute chunks · 3-second overlap · Sequential processing</p>
+                            <div class="upload-language-row">
+                                <label for="upload-language-select">Language:</label>
+                                <select id="upload-language-select" class="uk-select uk-form-width-small">
+                                    <option value="ja">Japanese</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="upload-hero-actions">
+                            <button class="uk-button uk-button-primary" id="upload-transcribe-button" disabled>Transcribe</button>
+                            <p class="upload-hero-note">Select a file to start</p>
+                        </div>
+                    </div>
+
+                    <div class="uk-grid uk-grid-small uk-grid-match" uk-grid>
+                        <div class="uk-width-1-1 uk-width-3-4@m">
+                            <label class="upload-dropzone upload-reveal delay-2" id="upload-dropzone">
+                                <input type="file" id="upload-input" accept="audio/mpeg" hidden>
+                                <div class="upload-dropzone-inner">
+                                    <span class="upload-dropzone-icon" uk-icon="icon: cloud-upload; ratio: 1.6"></span>
+                                    <h3>
+                                        <span class="upload-copy-desktop">Drop your MP3 here</span>
+                                        <span class="upload-copy-mobile">Select your MP3</span>
+                                    </h3>
+                                    <p class="upload-dropzone-copy">
+                                        <span class="upload-copy-desktop">or click to select a file</span>
+                                        <span class="upload-copy-mobile">Tap to choose a file</span>
+                                    </p>
+                                </div>
+                            </label>
+
+                            <div class="upload-card uk-card uk-card-default upload-reveal delay-3">
+                                <div class="uk-card-header">
+                                    <h3 class="uk-card-title">Transcription</h3>
+                                </div>
+                                <div class="uk-card-body">
+                                    <textarea id="upload-transcription-result" class="uk-textarea" placeholder="Transcription will appear here..." readonly></textarea>
+                                </div>
+                                <div class="uk-card-footer upload-actions">
+                                    <button class="uk-button uk-button-secondary" id="upload-copy-button" disabled>Copy</button>
+                                    <button class="uk-button uk-button-default" id="upload-save-button" disabled>Save</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="uk-width-1-1 uk-width-1-4@m">
+                            <div class="upload-card uk-card uk-card-default upload-reveal delay-2">
+                                <div class="uk-card-header">
+                                    <h3 class="uk-card-title">File Details</h3>
+                                </div>
+                                <div class="uk-card-body">
+                                    <dl class="uk-description-list upload-description">
+                                        <dt>Name</dt>
+                                        <dd id="upload-file-name">No file selected</dd>
+                                        <dt>Duration</dt>
+                                        <dd id="upload-file-duration">--:--</dd>
+                                        <dt>Size</dt>
+                                        <dd id="upload-file-size">--</dd>
+                                        <dt>Chunks</dt>
+                                        <dd id="upload-file-chunks">--</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                            <div class="upload-card uk-card uk-card-default upload-progress-card upload-reveal delay-3">
+                                <div class="uk-card-header">
+                                    <h3 class="uk-card-title">Progress</h3>
+                                </div>
+                                <div class="uk-card-body">
+                                    <ul class="upload-steps">
+                                        <li class="is-pending" id="upload-step-decode">Decode audio</li>
+                                        <li class="is-pending" id="upload-step-split">Split into chunks</li>
+                                        <li class="is-pending" id="upload-step-transcribe">Transcribe chunks</li>
+                                        <li class="is-pending" id="upload-step-merge">Merge results</li>
+                                    </ul>
+                                    <p class="upload-progress-note">Progress updates will appear here during transcription.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </li>
             

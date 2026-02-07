@@ -15,6 +15,7 @@ export function initNotesModule() {
     const saveModal = document.getElementById('save-modal');
     const noteTitleInput = document.getElementById('note-title');
     const mainTabs = document.getElementById('main-tabs');
+    const uploadSaveButton = document.getElementById('upload-save-button');
     
     // Current editing note ID (when in edit mode)
     let currentEditingNoteId = null;
@@ -43,12 +44,34 @@ export function initNotesModule() {
             noteTitleInput.value = '';
         }
         
+        saveModal.dataset.source = 'main';
         UIkit.modal(saveModal).show();
     });
+
+    if (uploadSaveButton) {
+        uploadSaveButton.addEventListener('click', () => {
+            const uploadResult = document.getElementById('upload-transcription-result');
+            const content = uploadResult ? uploadResult.value.trim() : '';
+
+            if (!content) {
+                UIkit.notification('There is no content to save', { status: 'warning' });
+                return;
+            }
+
+            currentEditingNoteId = null;
+            noteTitleInput.value = '';
+            saveModal.dataset.source = 'upload';
+            UIkit.modal(saveModal).show();
+        });
+    }
     
     saveNoteBtn.addEventListener('click', () => {
         const title = noteTitleInput.value.trim();
-        const content = document.getElementById('transcription-result').value.trim();
+        const source = saveModal.dataset.source || 'main';
+        const contentElement = source === 'upload'
+            ? document.getElementById('upload-transcription-result')
+            : document.getElementById('transcription-result');
+        const content = contentElement ? contentElement.value.trim() : '';
         
         if (!title) {
             UIkit.notification('Please enter a title for your note', { status: 'warning' });
@@ -60,7 +83,7 @@ export function initNotesModule() {
             return;
         }
         
-        if (currentEditingNoteId) {
+        if (currentEditingNoteId && source !== 'upload') {
             // Update existing note
             updateNote(currentEditingNoteId, title, content);
             
@@ -79,19 +102,36 @@ export function initNotesModule() {
         
         // Close the modal
         UIkit.modal(saveModal).hide();
-        
-        // Clear the text area
-        document.getElementById('transcription-result').value = '';
-        
-        // Trigger input event to resize the textarea and update control state
-        const inputEvent = new Event('input', {
-            bubbles: true,
-            cancelable: true,
-        });
-        document.getElementById('transcription-result').dispatchEvent(inputEvent);
-        
-        // Clear from localStorage
-        localStorage.removeItem('voice-note-transcription');
+
+        if (source === 'upload') {
+            if (contentElement) {
+                contentElement.value = '';
+            }
+            const uploadCopyButton = document.getElementById('upload-copy-button');
+            const uploadSaveButtonRef = document.getElementById('upload-save-button');
+            if (uploadCopyButton) {
+                uploadCopyButton.disabled = true;
+            }
+            if (uploadSaveButtonRef) {
+                uploadSaveButtonRef.disabled = true;
+            }
+        } else {
+            // Clear the text area
+            const transcriptionResult = document.getElementById('transcription-result');
+            transcriptionResult.value = '';
+
+            // Trigger input event to resize the textarea and update control state
+            const inputEvent = new Event('input', {
+                bubbles: true,
+                cancelable: true,
+            });
+            transcriptionResult.dispatchEvent(inputEvent);
+
+            // Clear from localStorage
+            localStorage.removeItem('voice-note-transcription');
+        }
+
+        saveModal.dataset.source = 'main';
     });
     
     // Load the note list when the notes tab is shown

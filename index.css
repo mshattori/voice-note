@@ -16,6 +16,16 @@ body {
     background-color: #f0f0f0;
 }
 
+:root {
+    --upload-ink: #1f2a37;
+    --upload-muted: #667085;
+    --upload-accent: #0f766e;
+    --upload-accent-soft: rgba(15, 118, 110, 0.16);
+    --upload-card: #ffffff;
+    --upload-sand: #f6f3ea;
+    --upload-sky: #e7f2ff;
+}
+
 #app {
     background-color: #fff;
     margin: 1.25rem auto 0;
@@ -91,6 +101,234 @@ button:disabled {
     bottom: 0.625rem;
     display: flex;
     gap: 0.75rem;
+}
+
+/* Upload UI */
+#upload-area {
+    text-align: left;
+    color: var(--upload-ink);
+    font-family: "Space Grotesk", sans-serif;
+}
+
+.upload-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.upload-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    color: var(--upload-muted);
+    margin-bottom: 0.5rem;
+}
+
+.upload-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+}
+
+.upload-subtitle {
+    color: var(--upload-muted);
+    margin: 0 0 0.75rem;
+}
+
+.upload-language-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.upload-language-row label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--upload-ink);
+}
+
+.upload-language-row .uk-select {
+    margin: 0;
+}
+
+.upload-hero-actions {
+    text-align: right;
+    min-width: 180px;
+}
+
+.upload-hero-note {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--upload-muted);
+}
+
+.upload-dropzone {
+    display: block;
+    padding: 1.1rem 1.25rem;
+    border: 2px dashed var(--upload-accent);
+    border-radius: 0.9rem;
+    background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 55%),
+        linear-gradient(135deg, var(--upload-sand), var(--upload-sky));
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.upload-dropzone:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(15, 118, 110, 0.12);
+    border-color: #0b5f58;
+}
+
+.upload-dropzone.is-dragover {
+    border-color: #0b5f58;
+    box-shadow: 0 16px 28px rgba(15, 118, 110, 0.18);
+}
+
+.upload-dropzone.is-disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.upload-dropzone-inner {
+    text-align: center;
+    color: var(--upload-ink);
+}
+
+.upload-dropzone-inner h3 {
+    margin: 0.35rem 0 0.2rem;
+    font-size: 1.1rem;
+}
+
+.upload-dropzone-copy {
+    margin: 0 0 0.35rem;
+    color: var(--upload-muted);
+}
+
+.upload-copy-mobile {
+    display: none;
+}
+
+.upload-card {
+    border-radius: 0.75rem;
+    border: 1px solid #e7e9ee;
+    box-shadow: none;
+}
+
+.upload-card .uk-card-header {
+    border-bottom: 1px solid #eef0f4;
+}
+
+.upload-description dt {
+    color: var(--upload-muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.upload-description dd {
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+#upload-transcription-result {
+    min-height: 18rem;
+    white-space: pre-wrap;
+    resize: vertical;
+}
+
+.upload-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.upload-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.upload-steps li {
+    position: relative;
+    padding-left: 1.6rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--upload-muted);
+}
+
+.upload-steps li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.3rem;
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    background: #d1d5db;
+    border: 2px solid #f3f4f6;
+}
+
+.upload-steps li.is-active {
+    color: var(--upload-ink);
+}
+
+.upload-steps li.is-active::before {
+    background: var(--upload-accent);
+    border-color: var(--upload-accent-soft);
+}
+
+.upload-steps li.is-complete {
+    color: var(--upload-ink);
+}
+
+.upload-steps li.is-complete::before {
+    background: #16a34a;
+    border-color: rgba(22, 163, 74, 0.2);
+}
+
+.upload-progress-note {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--upload-muted);
+}
+
+.upload-reveal {
+    animation: upload-rise 0.6s ease both;
+}
+
+.upload-reveal.delay-1 {
+    animation-delay: 0.05s;
+}
+
+.upload-reveal.delay-2 {
+    animation-delay: 0.15s;
+}
+
+.upload-reveal.delay-3 {
+    animation-delay: 0.25s;
+}
+
+@keyframes upload-rise {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .upload-reveal {
+        animation: none;
+    }
+
+    .upload-dropzone {
+        transition: none;
+    }
 }
 
 /* Notes List Styles */
@@ -198,6 +436,27 @@ button:disabled {
     
     #timer {
         font-size: 1.25rem;
+    }
+
+    .upload-hero {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .upload-hero-actions {
+        text-align: left;
+    }
+
+    .upload-copy-desktop {
+        display: none;
+    }
+
+    .upload-copy-mobile {
+        display: inline;
+    }
+
+    #upload-transcription-result {
+        min-height: 14rem;
     }
 }
 
